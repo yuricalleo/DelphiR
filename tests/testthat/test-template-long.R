@@ -58,6 +58,7 @@ test_that("CSV templates have the expected columns", {
   expect_error(delphi_template(file.path(dir, "x.csv"), items = 0), "positive whole number")
   expect_error(delphi_template(file.path(dir, "y.csv"), items = c("A", "A")), "unique")
   expect_error(delphi_template(file.path(dir, "no-dir", "z.csv")), "does not exist")
+  expect_error(delphi_template(), "path of the template")
 })
 
 test_that("Excel templates can be filled in and imported", {

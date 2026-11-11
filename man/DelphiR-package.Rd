@@ -66,6 +66,15 @@ publication-quality figures built with \pkg{ggplot2}.
 See \code{vignette("DelphiR")} for an introduction to the complete workflow.
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/yuricalleo/DelphiR}
+  \item \url{https://yuricalleo.github.io/DelphiR/}
+  \item Report bugs at \url{https://github.com/yuricalleo/DelphiR/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Yuri Calleo \email{yuri.calleo@unimercatorum.it} [copyright holder]
 

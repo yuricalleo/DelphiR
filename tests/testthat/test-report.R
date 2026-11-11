@@ -12,6 +12,7 @@ test_that("arguments are validated before rendering", {
   skip_if_not(rmarkdown::pandoc_available())
   x <- example_x()
   expect_error(delphi_report(x, file.path(tempdir(), "r.pdf"), open = FALSE), "html or .docx")
+  expect_error(delphi_report(x, open = FALSE), "path of the report")
   expect_error(delphi_report(x, file.path(tempdir(), "r.html"), item_labels = c(E99 = "x"),
                              open = FALSE), "unknown item")
   expect_error(delphi_report(x, file.path(tempdir(), "r.html"), item_labels = "x",

@@ -44,13 +44,13 @@
 #' path <- delphi_template(file.path(tempdir(), "delphi_long.csv"), layout = "long")
 #' readLines(path)
 #' @export
-delphi_template <- function(file = "delphi_template.xlsx", items = 10,
+delphi_template <- function(file, items = 10,
                             layout = c("wide", "long"),
                             indicators = c("impact", "probability"),
                             overwrite = FALSE) {
   layout <- match.arg(layout)
-  if (!is_string(file)) {
-    stop_dr("`file` must be a single file path.")
+  if (missing(file) || !is_string(file)) {
+    stop_dr("`file` must be the path of the template, ending in .xlsx or .csv.")
   }
   ext <- tolower(tools_file_ext(file))
   if (!ext %in% c("xlsx", "csv")) {

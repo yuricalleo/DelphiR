@@ -51,7 +51,7 @@
 #' }
 #' }
 #' @export
-delphi_report <- function(x, file = "delphi_report.html",
+delphi_report <- function(x, file,
                           title = "Delphi study: round report", author = NULL,
                           round = NULL, item_labels = NULL,
                           threshold = 0.20, relative_to = c("points", "range"),
@@ -69,8 +69,8 @@ delphi_report <- function(x, file = "delphi_report.html",
   if (!rmarkdown::pandoc_available()) {
     stop_dr("Reports require Pandoc, which is included in RStudio (https://pandoc.org).")
   }
-  if (!is_string(file)) {
-    stop_dr("`file` must be a single file path.")
+  if (missing(file) || !is_string(file)) {
+    stop_dr("`file` must be the path of the report, ending in .html or .docx.")
   }
   ext <- tolower(tools_file_ext(file))
   format <- switch(ext,

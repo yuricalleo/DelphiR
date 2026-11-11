@@ -5,7 +5,7 @@
 \title{Create a data-entry template}
 \usage{
 delphi_template(
-  file = "delphi_template.xlsx",
+  file,
   items = 10,
   layout = c("wide", "long"),
   indicators = c("impact", "probability"),

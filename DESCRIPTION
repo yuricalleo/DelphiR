@@ -16,7 +16,7 @@ Description: Tools for the statistical analysis of Delphi studies. Expert
     classified as consensus, unstable consensus, stable dissent or open, in
     order to identify those to be submitted to a further round. The package
     also provides data-entry templates, publication-quality figures and
-    self-contained round reports in HTML or Word format.
+    self-contained round reports in HTML or 'Microsoft Word' format.
 License: GPL (>= 3)
 URL: https://github.com/yuricalleo/DelphiR, https://yuricalleo.github.io/DelphiR/
 BugReports: https://github.com/yuricalleo/DelphiR/issues

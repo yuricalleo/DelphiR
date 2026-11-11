@@ -1,6 +1,7 @@
 ## Submission
 
-This is the first submission of DelphiR.
+This is the first submission of DelphiR, a package for the statistical
+analysis of Delphi studies.
 
 ## R CMD check results
 
@@ -11,6 +12,14 @@ This is the first submission of DelphiR.
 ## Test environments
 
 * Local: Ubuntu 24.04, R 4.3.3
-* GitHub Actions: macOS (release), Windows (release), Ubuntu (devel,
-  release, oldrel-1)
-* win-builder (devel and release)
+* GitHub Actions: Windows (release, devel), macOS (release), Ubuntu 24.04
+  (devel, release, oldrel-1)
+* win-builder (devel)
+
+## Notes for the reviewers
+
+* Functions that write files (`delphi_report()` and `delphi_template()`)
+  require an explicit path; examples, tests and the vignette write only to
+  `tempdir()`.
+* Examples that render reports are wrapped in `\donttest{}`, because they
+  require Pandoc and take a few seconds.
