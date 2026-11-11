@@ -90,8 +90,10 @@ measured by its number of points, so that the threshold corresponds to an IQR
 of at most 1 on a five-point scale and at most 2 on a ten-point scale.
 
 Stability between consecutive rounds is assessed with the Wilcoxon test
-(signed-rank for linked experts, rank-sum otherwise), with the 15% change
-criterion of Scheibe, Skutsch and Schofer (1975), or with both. Consensus and
+(signed-rank for linked experts, rank-sum otherwise), with a criterion based
+on Scheibe, Skutsch and Schofer (1975), which considers an item stable when
+the net change between the rating distributions of two rounds does not exceed
+15%, or with both. Consensus and
 stability are then combined into four categories:
 
 | Status             | Consensus | Stable | Further round |

@@ -36,8 +36,8 @@ First release.
   at most 20% of the rating scale by default (von der Gracht, 2012).
 * `delphi_stability()` assesses stability between consecutive rounds with
   the Wilcoxon test (the default: signed-rank for linked experts, rank-sum
-  otherwise), with the 15% change criterion of Scheibe, Skutsch and Schofer
-  (1975), or with both.
+  otherwise), with a net-change criterion based on Scheibe, Skutsch and
+  Schofer (1975), or with both.
 * `delphi_status()` combines consensus and stability into four categories
   (consensus, unstable consensus, stable dissent and open) and identifies
   the items to be submitted to a further round.

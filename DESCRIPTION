@@ -11,8 +11,8 @@ Description: Tools for the statistical analysis of Delphi studies. Expert
     descriptive statistics, panel participation and item-level dispersion
     measures. Consensus is assessed with the interquartile-range criterion
     reviewed by von der Gracht (2012) <doi:10.1016/j.techfore.2012.04.013>,
-    and stability between rounds with the Wilcoxon test or the 15% change
-    criterion of Scheibe, Skutsch and Schofer (1975). Items are then
+    and stability between rounds with the Wilcoxon test or with a net-change
+    criterion based on Scheibe, Skutsch and Schofer (1975). Items are then
     classified as consensus, unstable consensus, stable dissent or open, in
     order to identify those to be submitted to a further round. The package
     also provides data-entry templates, publication-quality figures and

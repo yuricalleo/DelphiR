@@ -10,9 +10,10 @@
 #'   answered both rounds; otherwise it is the rank-sum (Mann-Whitney) test
 #'   on the two independent samples. The item is stable when the test is not
 #'   significant (`p_value >= alpha`).
-#' * Scheibe: the 15% change criterion of Scheibe, Skutsch and Schofer
-#'   (1975). The item is stable when the net change between the two rating
-#'   distributions is at most `scheibe` (15% by default).
+#' * Net change between distributions: a criterion based on Scheibe,
+#'   Skutsch and Schofer (1975). The item is stable when the net change
+#'   between the two rating distributions, computed as described in Details,
+#'   is at most `scheibe` (15% by default).
 #'
 #' @param x A `delphi_data` object with at least two rounds.
 #' @param method Stability criterion used for the `stable` column:
@@ -20,13 +21,13 @@
 #'   agree). Both criteria are always reported.
 #' @param alpha Significance level of the Wilcoxon test. Default `0.05`.
 #' @param scheibe Largest share of net change that still counts as stable
-#'   under the Scheibe criterion. Default `0.15`.
+#'   under the net-change criterion. Default `0.15`.
 #' @param rounds Optional round numbers to compare. Consecutive rounds among
 #'   them are compared (for example `c(1, 3)` compares round 1 with round
 #'   3). `NULL` compares all consecutive rounds.
 #' @param indicator,items Optional subsets of indicators and items.
 #' @param bins Number of classes used to build the rating distributions for
-#'   the Scheibe criterion on long scales. Scales with up to `bins` points
+#'   the net-change criterion on long scales. Scales with up to `bins` points
 #'   use one class per scale point; longer scales are split into `bins`
 #'   equal classes (for example 1 to 10, 11 to 20, ..., 91 to 100). Default
 #'   `10`.
@@ -44,25 +45,27 @@
 #' Medians and IQRs are always computed on all experts who answered each
 #' round (`n_from`, `n_to`), as in [delphi_describe()].
 #'
+#' The ratings of each round are grouped into classes (one class per scale
+#' point, or `bins` classes on long scales), and the net change is
+#' \deqn{C = \frac{1}{2} \sum_k \left| p_k^{(t)} - p_k^{(t-1)} \right|,}{C = (1/2) sum_k |p_k(t) - p_k(t-1)|,}
+#' where \eqn{p_k^{(t)}}{p_k(t)} is the share of experts in class \eqn{k} in
+#' round \eqn{t}. \eqn{C} is the share of experts who would have to move to
+#' another class to turn one distribution into the other.
+#'
 #' In the paired comparison, the test, the share of experts who changed
-#' their rating (`changed`) and the Scheibe change are computed on the
-#' experts who answered the item in both rounds (`n_paired`), so that
-#' drop-outs are not mistaken for changes of opinion. The Scheibe change is
-#' half the sum of the absolute differences between the frequencies of the
-#' two rating distributions, divided by the number of paired experts: the
-#' share of experts who would have to move to turn one distribution into the
-#' other.
+#' their rating (`changed`) and the net change are computed on the experts
+#' who answered the item in both rounds (`n_paired`), so that drop-outs are
+#' not mistaken for changes of opinion.
 #'
 #' In the unpaired comparison, used when the same expert cannot be
 #' identified in both rounds, the test is the Wilcoxon rank-sum test and the
-#' Scheibe change is half the sum of the absolute differences between the
-#' relative frequencies of the two distributions; `n_paired` and `changed`
-#' are `NA`. Since the two samples may include different experts, a
+#' net change is computed on all the experts who answered each round;
+#' `n_paired` and `changed` are `NA`. Since the two samples may include different experts, a
 #' difference between rounds reflects both changes of opinion and changes in
 #' the composition of the panel.
 #'
 #' When the two rounds contain exactly the same ratings, the item is stable
-#' under both criteria (`p_value = 1`, Scheibe change `0`).
+#' under both criteria (`p_value = 1`, net change `0`).
 #'
 #' @return A data frame of class `delphi_stability` with one row per
 #'   indicator, item and pair of rounds, and columns `indicator`, `item`,
@@ -84,7 +87,7 @@
 #'                  scale = list(impact = c(1, 10), plausibility = c(1, 100)))
 #' delphi_stability(x)
 #'
-#' # Scheibe criterion only, on the impact ratings
+#' # Net-change criterion only, on the impact ratings
 #' delphi_stability(x, method = "scheibe", indicator = "impact")
 #' @export
 delphi_stability <- function(x, method = c("wilcoxon", "scheibe", "both"),
@@ -219,7 +222,7 @@ stability_row <- function(a, b, ind, it, r0, r1, breaks, type, exact, paired = T
   )
 }
 
-# Class limits for the Scheibe distributions: one class per scale point on
+# Class limits for the net-change criterion: one class per scale point on
 # short scales, `bins` equal-width classes on long ones. Limits sit half a
 # point outside the scale, so that a 1-100 scale gives the classes 1-10,
 # 11-20, ..., 91-100.
@@ -253,8 +256,8 @@ print.delphi_stability <- function(x, digits = 2, ...) {
     test <- if (isFALSE(rule$paired)) "Wilcoxon rank-sum test" else "Wilcoxon signed-rank test"
     crit <- switch(rule$method,
       wilcoxon = paste0(test, ", stable if p >= ", format(rule$alpha)),
-      scheibe = paste0("Scheibe et al. (1975), stable if change <= ", format(100 * rule$scheibe), "%"),
-      both = paste0("Wilcoxon (p >= ", format(rule$alpha), ") and Scheibe (change <= ",
+      scheibe = paste0("net change between distributions, stable if <= ", format(100 * rule$scheibe), "%"),
+      both = paste0("Wilcoxon (p >= ", format(rule$alpha), ") and net change (<= ",
                     format(100 * rule$scheibe), "%)")
     )
     cat("Stability criterion: ", crit, "\n", sep = "")

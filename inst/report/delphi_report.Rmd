@@ -106,6 +106,17 @@ heat_height <- 1.8 + 0.42 * n_items
 scale_desc <- vapply(
   inds, function(i) paste0(i, " (", scale_txt(x$scales[[i]]), ")"), character(1)
 )
+cut_offs <- vapply(inds, function(i) {
+  s <- x$scales[[i]]
+  w <- if (cfg$relative_to == "points") s[2] - s[1] + 1 else s[2] - s[1]
+  format(round(cfg$threshold * w, 2))
+}, character(1))
+cut_txt <- if (length(unique(cut_offs)) == 1L) {
+  paste0("IQR \u2264 ", cut_offs[1],
+         if (length(inds) > 1) " for all indicators" else "")
+} else {
+  list_txt(paste0("IQR \u2264 ", cut_offs, " for ", inds))
+}
 denominator <- if (cfg$relative_to == "points") {
   "the number of points of the rating scale"
 } else {
@@ -138,15 +149,14 @@ if (!is.null(cfg$item_labels)) {
 **Descriptive statistics.** For each item, round and indicator, the report
 gives the number of ratings, the median, the first and third quartiles
 (Q1, Q3) and the interquartile range (IQR = Q3 - Q1). Quantiles are
-computed with the type `r cfg$type` algorithm of Hyndman and Fan (1996), as
-implemented in R. The relative IQR expresses the IQR as a share of
+computed with the type `r cfg$type` algorithm of the R function quantile(). The relative IQR expresses the IQR as a share of
 `r denominator`, so that dispersion can be compared across indicators rated
 on different scales.
 
 **Consensus.** An item is considered to have reached consensus when its IQR
 does not exceed `r format(100 * cfg$threshold)`% of `r denominator`
 (von der Gracht, 2012). On the scales used in this study, this corresponds to
-`r list_txt(vapply(inds, function(i) { s <- x$scales[[i]]; w <- if (cfg$relative_to == "points") s[2] - s[1] + 1 else s[2] - s[1]; paste0("IQR ≤ ", format(round(cfg$threshold * w, 2)), " for ", i) }, character(1)))`.
+`r cut_txt`.
 
 ```{r methods-stability, results = "asis"}
 if (multi_round) {
@@ -161,13 +171,18 @@ if (multi_round) {
     scheibe = paste0(
       "an item is considered stable when the net change between the two rating ",
       "distributions does not exceed ", format(100 * cfg$scheibe), "% of ", base,
-      " (Scheibe, Skutsch and Schofer, 1975)"
+      ", a criterion based on Scheibe, Skutsch and Schofer (1975). The net ",
+      "change is half the sum of the absolute differences between the shares of ",
+      "experts in each class of the rating scale in the two rounds"
     ),
     both = paste0(
       "an item is considered stable when the ", test, " is not significant at ",
       "the ", format(cfg$alpha), " level and the net change between the two ",
       "rating distributions does not exceed ", format(100 * cfg$scheibe),
-      "% of ", base, " (Scheibe, Skutsch and Schofer, 1975)"
+      "% of ", base, ", a criterion based on Scheibe, Skutsch and Schofer ",
+      "(1975). The net change is half the sum of the absolute differences ",
+      "between the shares of experts in each class of the rating scale in the ",
+      "two rounds"
     )
   )
   design <- if (cfg$paired) {
@@ -273,7 +288,7 @@ for (ind in inds) {
         `IQR change` = sb$iqr_change,
         `Experts who changed` = pct(sb$changed),
         `Wilcoxon p` = formatC(sb$p_value, format = "f", digits = 3),
-        `Net change (Scheibe)` = pct(sb$scheibe_change),
+        `Net change` = pct(sb$scheibe_change),
         Stable = yes_no(sb$stable),
         check.names = FALSE
       )
@@ -286,7 +301,7 @@ for (ind in inds) {
         `Median change` = sb$median_change,
         `IQR change` = sb$iqr_change,
         `Rank-sum p` = formatC(sb$p_value, format = "f", digits = 3),
-        `Net change (Scheibe)` = pct(sb$scheibe_change),
+        `Net change` = pct(sb$scheibe_change),
         Stable = yes_no(sb$stable),
         check.names = FALSE
       )
@@ -375,9 +390,6 @@ if (nrow(nr) == 0) {
 ```
 
 # References
-
-Hyndman, R. J. and Fan, Y. (1996). Sample quantiles in statistical packages.
-*The American Statistician*, 50(4), 361-365.
 
 `r if (multi_round) "Scheibe, M., Skutsch, M. and Schofer, J. (1975). Experiments in Delphi methodology. In H. A. Linstone and M. Turoff (Eds.), *The Delphi Method: Techniques and Applications* (pp. 262-287). Reading, MA: Addison-Wesley."`
 

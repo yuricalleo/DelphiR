@@ -43,7 +43,7 @@
 #' * [delphi_consensus()]: IQR consensus rule (IQR at most 20% of the scale
 #'   by default).
 #' * [delphi_stability()]: stability between rounds (Wilcoxon test or
-#'   Scheibe 15% criterion).
+#'   net change between distributions, based on Scheibe et al., 1975).
 #' * [delphi_status()]: consensus and stability together, and the items for
 #'   the next round.
 #' * [delphi_plot_distribution()], [delphi_plot_trend()],
