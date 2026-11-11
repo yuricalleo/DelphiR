@@ -56,6 +56,7 @@
 #' * [delphi_feedback()]: controlled feedback for the experts before a
 #'   further round.
 #' * [delphi_wide()] and `as.data.frame()`: back to wide or long tables.
+#' * [run_app()]: an interactive application for the whole workflow.
 #'
 #' See `vignette("DelphiR")` for an introduction to the complete workflow.
 #'

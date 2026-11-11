@@ -43,6 +43,9 @@ reference:
     contents:
       - delphi_report
       - delphi_feedback
+  - title: Interactive application
+    contents:
+      - run_app
   - title: Data
     contents:
       - delphi_example

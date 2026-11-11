@@ -32,10 +32,13 @@ Imports:
     stats,
     utils
 Suggests:
+    bslib (>= 0.6.0),
+    DT,
     ggrepel,
     knitr,
     readxl,
     rmarkdown,
+    shiny (>= 1.7.0),
     testthat (>= 3.0.0),
     withr,
     writexl

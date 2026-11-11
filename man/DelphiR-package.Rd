@@ -66,6 +66,7 @@ publication-quality figures built with \pkg{ggplot2}.
 \item \code{\link[=delphi_feedback]{delphi_feedback()}}: controlled feedback for the experts before a
 further round.
 \item \code{\link[=delphi_wide]{delphi_wide()}} and \code{as.data.frame()}: back to wide or long tables.
+\item \code{\link[=run_app]{run_app()}}: an interactive application for the whole workflow.
 }
 
 See \code{vignette("DelphiR")} for an introduction to the complete workflow.

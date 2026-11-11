@@ -90,6 +90,19 @@ delphi_feedback(x, "feedback_round3.docx")
 
 See `vignette("DelphiR")` for an introduction to the complete workflow.
 
+## Interactive application
+
+`run_app()` opens an application in the web browser that covers the same
+workflow without writing code: import of the ratings and comments by
+choosing the columns of the file, tables, figures, the analysis of the
+comments, the round report and the feedback for the experts. The
+application also writes the R code that reproduces the analysis.
+
+```r
+# install.packages(c("shiny", "bslib", "DT"))
+run_app()
+```
+
 ## Consensus and stability
 
 By default, an item reaches consensus when its interquartile range (IQR) does
