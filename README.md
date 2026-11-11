@@ -1,4 +1,4 @@
-# DelphiR
+# DelphiR <img src="man/figures/logo.png" align="right" height="139" alt="DelphiR logo" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/yuricalleo/DelphiR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yuricalleo/DelphiR/actions/workflows/R-CMD-check.yaml)
