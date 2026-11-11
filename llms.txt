@@ -1,0 +1,200 @@
+# DelphiR
+
+DelphiR is an R package for the statistical analysis of Delphi studies.
+It imports and validates the expert ratings, computes descriptive
+statistics by item, round and indicator, assesses consensus and
+stability, identifies the items to be submitted to a further round,
+draws publication-quality figures and generates a complete round report
+in HTML or Word format.
+
+## Installation
+
+The development version can be installed from GitHub:
+
+``` r
+
+# install.packages("remotes")
+remotes::install_github("yuricalleo/DelphiR")
+```
+
+## Data format
+
+Ratings are arranged with one row per expert, one column per item and
+one numeric rating in each cell:
+
+| expert | round | indicator | E1  | E2  | E3  |
+|--------|-------|-----------|-----|-----|-----|
+| EXP01  | 1     | impact    | 9   | 7   | 5   |
+| EXP02  | 1     | impact    | 6   | 5   | 7   |
+| EXP03  | 1     | impact    | 8   |     | 6   |
+
+- Empty cells denote missing ratings.
+- The expert identifier is required to follow the same expert across
+  rounds.
+- The round and indicator columns are optional. Without them, each table
+  is treated as a single round and a single indicator, and tables can be
+  combined with
+  [`delphi_bind()`](https://yuricalleo.github.io/DelphiR/reference/delphi_bind.md).
+- Each indicator has its own rating scale, for example from 1 to 10 or
+  from 1 to 100.
+
+[`delphi_template()`](https://yuricalleo.github.io/DelphiR/reference/delphi_template.md)
+creates an empty Excel or CSV file in this format, with instructions and
+the code needed to import it. Ratings in long format, with one row per
+rating, are imported with
+[`delphi_data_long()`](https://yuricalleo.github.io/DelphiR/reference/delphi_data_long.md)
+or `read_delphi(layout = "long")`, and survey exports with two header
+rows (indicators in the first row, item statements in the second) with
+`read_delphi(header_rows = 2)`. When identifiers do not denote the same
+expert in every round, as with response numbers of separate
+questionnaires, the data should be declared with `linked = FALSE`, so
+that rounds are compared as independent samples.
+
+## Example
+
+``` r
+
+library(DelphiR)
+
+# Empty template to be filled in
+delphi_template("my_delphi.xlsx", items = 12)
+
+# Example data: two rounds, two indicators
+x <- delphi_data(
+  delphi_example,
+  expert_col = "expert", round_col = "round", indicator_col = "indicator",
+  scale = list(impact = c(1, 10), plausibility = c(1, 100))
+)
+
+x                    # overview
+summary(x)           # panel and median [IQR] by item and round
+delphi_describe(x)   # descriptive statistics
+delphi_consensus(x)  # consensus: IQR at most 20% of the rating scale
+delphi_stability(x)  # stability between consecutive rounds
+delphi_status(x)     # item status and items for the next round
+
+# Figures, returned as ggplot objects
+plot(x, type = "distribution", indicator = "impact")
+plot(x, type = "trend", indicator = "impact")
+plot(x, type = "consensus")
+plot(x, type = "map")
+
+# Round report in Word or HTML format
+delphi_report(x, "round2_report.docx")
+```
+
+See
+[`vignette("DelphiR")`](https://yuricalleo.github.io/DelphiR/articles/DelphiR.md)
+for an introduction to the complete workflow.
+
+## Consensus and stability
+
+By default, an item reaches consensus when its interquartile range (IQR)
+does not exceed 20% of the rating scale (von der Gracht, 2012). The
+scale is measured by its number of points, so that the threshold
+corresponds to an IQR of at most 1 on a five-point scale and at most 2
+on a ten-point scale.
+
+Stability between consecutive rounds is assessed with the Wilcoxon test
+(signed-rank for linked experts, rank-sum otherwise), with the 15%
+change criterion of Scheibe, Skutsch and Schofer (1975), or with both.
+Consensus and stability are then combined into four categories:
+
+| Status             | Consensus | Stable | Further round |
+|--------------------|-----------|--------|---------------|
+| Consensus          | yes       | yes    | no            |
+| Unstable consensus | yes       | no     | yes           |
+| Stable dissent     | no        | yes    | no            |
+| Open               | no        | no     | yes           |
+
+## Citation
+
+To cite DelphiR in publications, use `citation("DelphiR")`.
+
+## References
+
+Scheibe, M., Skutsch, M. and Schofer, J. (1975). Experiments in Delphi
+methodology. In H. A. Linstone and M. Turoff (Eds.), *The Delphi Method:
+Techniques and Applications* (pp. 262-287). Reading, MA: Addison-Wesley.
+
+von der Gracht, H. A. (2012). Consensus measurement in Delphi studies:
+Review and implications for future quality assurance. *Technological
+Forecasting and Social Change*, 79(8), 1525-1536.
+<https://doi.org/10.1016/j.techfore.2012.04.013>
+
+## License
+
+GPL (\>= 3)
+
+# Package index
+
+## Data import
+
+- [`delphi_template()`](https://yuricalleo.github.io/DelphiR/reference/delphi_template.md)
+  : Create a data-entry template
+- [`read_delphi()`](https://yuricalleo.github.io/DelphiR/reference/read_delphi.md)
+  : Read Delphi ratings from a file
+- [`delphi_data()`](https://yuricalleo.github.io/DelphiR/reference/delphi_data.md)
+  : Create a Delphi data object
+- [`delphi_data_long()`](https://yuricalleo.github.io/DelphiR/reference/delphi_data_long.md)
+  : Create a Delphi data object from a long table
+- [`delphi_bind()`](https://yuricalleo.github.io/DelphiR/reference/delphi_bind.md)
+  : Combine Delphi data objects
+- [`is_delphi_data()`](https://yuricalleo.github.io/DelphiR/reference/is_delphi_data.md)
+  : Check whether an object is a Delphi data object
+
+## Description
+
+- [`delphi_describe()`](https://yuricalleo.github.io/DelphiR/reference/delphi_describe.md)
+  : Descriptive statistics of a Delphi study
+- [`delphi_panel()`](https://yuricalleo.github.io/DelphiR/reference/delphi_panel.md)
+  : Panel participation across rounds
+- [`summary(`*`<delphi_data>`*`)`](https://yuricalleo.github.io/DelphiR/reference/summary.delphi_data.md)
+  : Summarise a Delphi data object
+- [`print(`*`<delphi_data>`*`)`](https://yuricalleo.github.io/DelphiR/reference/print.delphi_data.md)
+  : Print a Delphi data object
+- [`delphi_wide()`](https://yuricalleo.github.io/DelphiR/reference/delphi_wide.md)
+  : Ratings in wide format
+- [`as.data.frame(`*`<delphi_data>`*`)`](https://yuricalleo.github.io/DelphiR/reference/as.data.frame.delphi_data.md)
+  : Convert a Delphi data object to a data frame
+
+## Consensus and stability
+
+- [`delphi_consensus()`](https://yuricalleo.github.io/DelphiR/reference/delphi_consensus.md)
+  : Consensus by item, round and indicator
+- [`delphi_stability()`](https://yuricalleo.github.io/DelphiR/reference/delphi_stability.md)
+  : Stability of ratings between rounds
+- [`delphi_status()`](https://yuricalleo.github.io/DelphiR/reference/delphi_status.md)
+  : Item status from consensus and stability
+
+## Figures
+
+- [`plot(`*`<delphi_data>`*`)`](https://yuricalleo.github.io/DelphiR/reference/plot.delphi_data.md)
+  : Plot a Delphi data object
+- [`delphi_plot_distribution()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_distribution.md)
+  : Distribution of the ratings by round
+- [`delphi_plot_trend()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_trend.md)
+  : Median and interquartile range across rounds
+- [`delphi_plot_consensus()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_consensus.md)
+  : Consensus heat map
+- [`delphi_plot_map()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_map.md)
+  : Two-indicator map of the items
+- [`theme_delphi()`](https://yuricalleo.github.io/DelphiR/reference/theme_delphi.md)
+  : ggplot2 theme for DelphiR figures
+
+## Reports
+
+- [`delphi_report()`](https://yuricalleo.github.io/DelphiR/reference/delphi_report.md)
+  : Generate a round report
+
+## Data
+
+- [`delphi_example`](https://yuricalleo.github.io/DelphiR/reference/delphi_example.md)
+  : Example Delphi study
+
+# Articles
+
+### All vignettes
+
+- [Introduction to
+  DelphiR](https://yuricalleo.github.io/DelphiR/articles/DelphiR.md):
