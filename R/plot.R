@@ -478,7 +478,8 @@ tools_title <- function(s) {
 #' * `"distribution"`: [delphi_plot_distribution()];
 #' * `"trend"`: [delphi_plot_trend()];
 #' * `"consensus"`: [delphi_plot_consensus()];
-#' * `"map"`: [delphi_plot_map()].
+#' * `"map"`: [delphi_plot_map()];
+#' * `"comments"`: [delphi_plot_comments()], for objects with comments.
 #'
 #' @param x A `delphi_data` object.
 #' @param type Type of figure.
@@ -491,13 +492,15 @@ tools_title <- function(s) {
 #' plot(x, type = "consensus")
 #' plot(x, type = "trend", indicator = "plausibility")
 #' @export
-plot.delphi_data <- function(x, type = c("distribution", "trend", "consensus", "map"), ...) {
+plot.delphi_data <- function(x, type = c("distribution", "trend", "consensus", "map", "comments"),
+                             ...) {
   type <- match.arg(type)
   fun <- switch(type,
     distribution = delphi_plot_distribution,
     trend = delphi_plot_trend,
     consensus = delphi_plot_consensus,
-    map = delphi_plot_map
+    map = delphi_plot_map,
+    comments = delphi_plot_comments
   )
   fun(x, ...)
 }

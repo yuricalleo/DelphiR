@@ -33,11 +33,13 @@ The path of the template, invisibly.
 \description{
 Writes an empty file in the DelphiR format, ready to be filled in with the
 ratings of a Delphi study and imported with \code{\link[=read_delphi]{read_delphi()}}. Excel
-templates contain three sheets:
+templates contain four sheets:
 \itemize{
 \item \code{ratings}, with the column headers of the chosen layout;
 \item \code{items}, listing the item codes, next to which the full statements can
 be written;
+\item \code{comments}, for the written comments of the experts, one per row (see
+\code{\link[=delphi_add_comments]{delphi_add_comments()}});
 \item \code{instructions}, explaining how to fill in the template, with an example
 and the R code to import it.
 }

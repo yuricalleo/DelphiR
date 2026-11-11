@@ -67,7 +67,7 @@ test_that("Excel templates can be filled in and imported", {
   dir <- withr::local_tempdir()
   path <- delphi_template(file.path(dir, "template.xlsx"), items = 3,
                           indicators = c("impact", "probability"))
-  expect_equal(readxl::excel_sheets(path), c("ratings", "items", "instructions"))
+  expect_equal(readxl::excel_sheets(path), c("ratings", "items", "comments", "instructions"))
   expect_equal(names(readxl::read_excel(path, "ratings")),
                c("expert", "round", "indicator", "E1", "E2", "E3"))
   ins <- readxl::read_excel(path, "instructions")$instructions
@@ -89,6 +89,26 @@ test_that("Excel templates can be filled in and imported", {
                    expert_col = "expert", round_col = "round",
                    indicator_col = "indicator", scale = c(1, 10))
   expect_equal(unname(x$labels), c("First statement", "Second statement", NA))
+
+  # The import code written in the instructions runs on the completed
+  # template, with an empty comments sheet
+  done <- file.path(dir, "template.xlsx")
+  writexl::write_xlsx(list(
+    ratings = data.frame(
+      expert = c("EXP01", "EXP02"), round = 1, indicator = "impact",
+      E1 = c(8, 7), E2 = c(6, NA), E3 = c(9, 8)
+    ),
+    items = readxl::read_excel(path, "items"),
+    comments = readxl::read_excel(path, "comments"),
+    instructions = readxl::read_excel(path, "instructions")
+  ), done)
+  code <- grep("^x <- read_delphi", ins, value = TRUE)
+  expect_length(code, 1)
+  e <- new.env()
+  withr::with_dir(dir, eval(parse(text = code), envir = e))
+  y <- e$x
+  expect_s3_class(y, "delphi_data")
+  expect_null(y$comments)
   expect_equal(names(x$scales), c("impact", "probability"))
   expect_error(read_delphi(filled, sheet = "ratings", items_sheet = "ratings",
                            expert_col = "expert", round_col = "round",

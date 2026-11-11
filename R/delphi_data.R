@@ -50,7 +50,9 @@
 #' * `items`: item names, in their original order;
 #' * `scales`: named list with the scale of each indicator;
 #' * `labels`: full item statements, named by item (`NA` when not given);
-#' * `linked`: whether experts are linked across rounds.
+#' * `linked`: whether experts are linked across rounds;
+#' * `comments`: the comments of the experts, when added with
+#'   [delphi_add_comments()] or read with [read_delphi()].
 #'
 #' @seealso [read_delphi()] to import from a file, [delphi_bind()] to combine
 #'   rounds or indicators.
@@ -244,7 +246,8 @@ resolve_labels <- function(item_labels, items) {
 
 
 # Constructor and validator (internal)
-new_delphi_data <- function(long, items, scales, labels = NULL, linked = TRUE) {
+new_delphi_data <- function(long, items, scales, labels = NULL, linked = TRUE,
+                            comments = NULL) {
   if (is.null(labels)) {
     labels <- stats::setNames(rep(NA_character_, length(items)), items)
   }
@@ -258,11 +261,12 @@ new_delphi_data <- function(long, items, scales, labels = NULL, linked = TRUE) {
   long <- long[ord, c("expert", "round", "indicator", "item", "value"), drop = FALSE]
   rownames(long) <- NULL
   check_duplicates(long)
-  structure(
-    list(data = long, items = items, scales = scales,
-         labels = labels[items], linked = linked),
-    class = "delphi_data"
-  )
+  out <- list(data = long, items = items, scales = scales,
+              labels = labels[items], linked = linked)
+  if (!is.null(comments) && nrow(comments) > 0L) {
+    out$comments <- sort_comments(comments, items)
+  }
+  structure(out, class = "delphi_data")
 }
 
 check_duplicates <- function(long) {
@@ -385,8 +389,11 @@ delphi_bind <- function(...) {
   }
   linked <- all(vapply(objs, obj_linked, logical(1)))
   long <- do.call(rbind, lapply(objs, `[[`, "data"))
+  comments <- do.call(rbind, lapply(objs, obj_comments))
+  comments <- comments[!duplicated(comments[c("expert", "round", "item", "indicator", "comment")]), ,
+                       drop = FALSE]
   new_delphi_data(long, items = items, scales = scales, labels = labels,
-                  linked = linked)
+                  linked = linked, comments = comments)
 }
 
 

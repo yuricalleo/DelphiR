@@ -1,8 +1,8 @@
 #' DelphiR: Statistical Analysis of Delphi Studies
 #'
 #' @description
-#' DelphiR imports, validates and summarises the ratings collected in a
-#' Delphi study.
+#' DelphiR imports, validates and summarises the ratings and the comments
+#' collected in a Delphi study.
 #'
 #' @section The DelphiR data format:
 #' Input data follow a wide layout: one row per expert, one column per
@@ -49,7 +49,12 @@
 #' * [delphi_plot_distribution()], [delphi_plot_trend()],
 #'   [delphi_plot_consensus()] and [delphi_plot_map()], or `plot()`:
 #'   publication-quality figures built with \pkg{ggplot2}.
+#' * [delphi_add_comments()]: written comments of the experts, analysed with
+#'   [delphi_comments()], [delphi_comment_counts()], [delphi_themes()],
+#'   [delphi_words()] and [delphi_plot_comments()].
 #' * [delphi_report()]: a self-contained round report in HTML or Word format.
+#' * [delphi_feedback()]: controlled feedback for the experts before a
+#'   further round.
 #' * [delphi_wide()] and `as.data.frame()`: back to wide or long tables.
 #'
 #' See `vignette("DelphiR")` for an introduction to the complete workflow.

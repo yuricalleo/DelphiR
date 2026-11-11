@@ -70,7 +70,9 @@ An object of class \code{delphi_data}: a list with elements
 \item \code{items}: item names, in their original order;
 \item \code{scales}: named list with the scale of each indicator;
 \item \code{labels}: full item statements, named by item (\code{NA} when not given);
-\item \code{linked}: whether experts are linked across rounds.
+\item \code{linked}: whether experts are linked across rounds;
+\item \code{comments}: the comments of the experts, when added with
+\code{\link[=delphi_add_comments]{delphi_add_comments()}} or read with \code{\link[=read_delphi]{read_delphi()}}.
 }
 }
 \description{

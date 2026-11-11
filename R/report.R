@@ -14,7 +14,11 @@
 #'   distribution and trend figures;
 #' * the consensus heat map and, with two or more indicators, the
 #'   two-indicator map;
-#' * the items to be submitted to a further round.
+#' * the items to be submitted to a further round;
+#' * when `x` contains comments (see [delphi_add_comments()]), the number of
+#'   comments by item, the themes coded by the researchers, the most
+#'   frequent words and the comments themselves, each with the position of
+#'   the author's rating relative to the interquartile range.
 #'
 #' @param x A `delphi_data` object.
 #' @param file Path of the report. The extension sets the format: `.html`
@@ -30,6 +34,11 @@
 #' @param threshold,relative_to Consensus rule, see [delphi_consensus()].
 #' @param method,alpha,scheibe,paired Stability rule, see [delphi_stability()].
 #' @param type Quantile algorithm; see [delphi_describe()].
+#' @param comments Which comments of the assessed round to list in full:
+#'   those on the items for the next round (`"next_round"`, default), all
+#'   of them (`"all"`) or none (`"none"`). Counts, themes and word
+#'   frequencies are reported whenever `x` contains comments. Expert
+#'   identifiers are never shown.
 #' @param open Whether to open the report once it has been created.
 #' @param quiet Whether to suppress the rendering messages.
 #'
@@ -57,18 +66,13 @@ delphi_report <- function(x, file,
                           threshold = 0.20, relative_to = c("points", "range"),
                           method = c("wilcoxon", "scheibe", "both"),
                           alpha = 0.05, scheibe = 0.15, type = 7, paired = NULL,
+                          comments = c("next_round", "all", "none"),
                           open = interactive(), quiet = TRUE) {
   assert_delphi_data(x)
   relative_to <- match.arg(relative_to)
   method <- match.arg(method)
-  for (pkg in c("rmarkdown", "knitr")) {
-    if (!requireNamespace(pkg, quietly = TRUE)) {
-      stop_dr("Reports require the '", pkg, "' package. Install it with install.packages(\"", pkg, "\").")
-    }
-  }
-  if (!rmarkdown::pandoc_available()) {
-    stop_dr("Reports require Pandoc, which is included in RStudio (https://pandoc.org).")
-  }
+  comments <- match.arg(comments)
+  check_render()
   if (missing(file) || !is_string(file)) {
     stop_dr("`file` must be the path of the report, ending in .html or .docx.")
   }
@@ -105,14 +109,32 @@ delphi_report <- function(x, file,
                 method = method, alpha = alpha, scheibe = scheibe, type = type,
                 paired = paired)
 
-  template <- system.file("report", "delphi_report.Rmd", package = "DelphiR")
+  cfg <- list(
+    round = round, item_labels = item_labels, threshold = threshold,
+    relative_to = relative_to, method = method, alpha = alpha,
+    scheibe = scheibe, type = type, paired = paired, linked = obj_linked(x),
+    comments = comments
+  )
+  render_template("delphi_report.Rmd", x = x, cfg = cfg, file = file,
+                  format = format, title = title, author = author,
+                  open = open, quiet = quiet)
+}
+
+# Render an R Markdown template of inst/report, with `x` and `cfg` in scope
+render_template <- function(name, x, cfg, file, format, title, author = NULL,
+                            open = FALSE, quiet = TRUE) {
+  template <- system.file("report", name, package = "DelphiR")
   if (!nzchar(template)) {
-    stop_dr("The report template could not be found; please reinstall DelphiR.")
+    stop_dr("The template '", name, "' could not be found; please reinstall DelphiR.")
   }
-  work <- tempfile("delphi_report_")
+  out_dir <- dirname(file)
+  if (!dir.exists(out_dir)) {
+    stop_dr("The folder '", out_dir, "' does not exist.")
+  }
+  work <- tempfile("delphi_render_")
   dir.create(work)
   on.exit(unlink(work, recursive = TRUE), add = TRUE)
-  rmd <- file.path(work, "report.Rmd")
+  rmd <- file.path(work, "document.Rmd")
   header <- c(
     "---",
     paste0("title: ", yaml_string(title)),
@@ -124,19 +146,9 @@ delphi_report <- function(x, file,
   body <- readLines(template, encoding = "UTF-8", warn = FALSE)
   writeLines(enc2utf8(c(header, body)), rmd, useBytes = TRUE)
 
-  cfg <- list(
-    round = round, item_labels = item_labels, threshold = threshold,
-    relative_to = relative_to, method = method, alpha = alpha,
-    scheibe = scheibe, type = type, paired = paired, linked = obj_linked(x)
-  )
   env <- new.env(parent = asNamespace("DelphiR"))
   env$x <- x
   env$cfg <- cfg
-
-  out_dir <- dirname(file)
-  if (!dir.exists(out_dir)) {
-    stop_dr("The folder '", out_dir, "' does not exist.")
-  }
   out <- rmarkdown::render(
     rmd,
     output_format = format,
@@ -150,6 +162,18 @@ delphi_report <- function(x, file,
     utils::browseURL(out)
   }
   invisible(out)
+}
+
+check_render <- function() {
+  for (pkg in c("rmarkdown", "knitr")) {
+    if (!requireNamespace(pkg, quietly = TRUE)) {
+      stop_dr("Reports require the '", pkg, "' package. Install it with install.packages(\"", pkg, "\").")
+    }
+  }
+  if (!rmarkdown::pandoc_available()) {
+    stop_dr("Reports require Pandoc, which is included in RStudio (https://pandoc.org).")
+  }
+  invisible(TRUE)
 }
 
 yaml_string <- function(s) {

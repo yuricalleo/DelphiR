@@ -1,5 +1,31 @@
 # DelphiR (development version)
 
+## Expert comments
+
+* `delphi_add_comments()` attaches the written comments of the experts to a
+  `delphi_data` object, from a table with one row per comment or from a
+  survey export with one comment column per item. Comments can be coded
+  with one or more themes.
+* `read_delphi(comments_sheet = )` reads the comments from a sheet of the
+  same Excel file, and `delphi_template()` now includes a `comments` sheet.
+* `delphi_comments()` lists the comments with the rating of their author
+  and its position relative to the interquartile range of the panel.
+* `delphi_comment_counts()`, `delphi_themes()` and `delphi_words()` count
+  the comments by item, tabulate the themes and compute word frequencies,
+  with common English and Italian words removed.
+* `delphi_plot_comments()` and `plot(type = "comments")` show the number of
+  comments by item, split by the position of their authors.
+* `delphi_report()` includes a section on the comments when they are
+  available; the new argument `comments` chooses which comments are listed.
+* Example dataset `delphi_example_comments`.
+
+## Feedback for the next round
+
+* `delphi_feedback()` prepares the controlled feedback for the experts:
+  median, quartiles and consensus of the items that require a further
+  round, with the comments of the panel reported anonymously, as a table or
+  as an HTML or Word document.
+
 # DelphiR 0.1.0
 
 First release.

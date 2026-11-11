@@ -18,6 +18,7 @@ delphi_report(
   scheibe = 0.15,
   type = 7,
   paired = NULL,
+  comments = c("next_round", "all", "none"),
   open = interactive(),
   quiet = TRUE
 )
@@ -45,6 +46,12 @@ labels stored in \code{x} (see \code{\link[=delphi_data]{delphi_data()}} and \co
 
 \item{type}{Quantile algorithm; see \code{\link[=delphi_describe]{delphi_describe()}}.}
 
+\item{comments}{Which comments of the assessed round to list in full:
+those on the items for the next round (\code{"next_round"}, default), all
+of them (\code{"all"}) or none (\code{"none"}). Counts, themes and word
+frequencies are reported whenever \code{x} contains comments. Expert
+identifiers are never shown.}
+
 \item{open}{Whether to open the report once it has been created.}
 
 \item{quiet}{Whether to suppress the rendering messages.}
@@ -66,7 +73,11 @@ the assessed round, stability between consecutive rounds, and the
 distribution and trend figures;
 \item the consensus heat map and, with two or more indicators, the
 two-indicator map;
-\item the items to be submitted to a further round.
+\item the items to be submitted to a further round;
+\item when \code{x} contains comments (see \code{\link[=delphi_add_comments]{delphi_add_comments()}}), the number of
+comments by item, the themes coded by the researchers, the most
+frequent words and the comments themselves, each with the position of
+the author's rating relative to the interquartile range.
 }
 }
 \details{

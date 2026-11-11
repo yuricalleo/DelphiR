@@ -3,11 +3,13 @@
 #' @description
 #' Writes an empty file in the DelphiR format, ready to be filled in with the
 #' ratings of a Delphi study and imported with [read_delphi()]. Excel
-#' templates contain three sheets:
+#' templates contain four sheets:
 #'
 #' * `ratings`, with the column headers of the chosen layout;
 #' * `items`, listing the item codes, next to which the full statements can
 #'   be written;
+#' * `comments`, for the written comments of the experts, one per row (see
+#'   [delphi_add_comments()]);
 #' * `instructions`, explaining how to fill in the template, with an example
 #'   and the R code to import it.
 #'
@@ -96,6 +98,7 @@ delphi_template <- function(file, items = 10,
     ratings = ratings,
     items = data.frame(item = codes, statement = rep("", length(codes)),
                        stringsAsFactors = FALSE),
+    comments = template_comments(),
     instructions = template_instructions(codes, layout, indicators, basename(file))
   )
   writexl::write_xlsx(sheets, file)
@@ -108,6 +111,14 @@ template_ratings <- function(codes, layout) {
   } else {
     cols <- c("expert", "round", "indicator", "item", "value")
   }
+  out <- as.data.frame(matrix(character(0), nrow = 0, ncol = length(cols)),
+                       stringsAsFactors = FALSE)
+  names(out) <- cols
+  out
+}
+
+template_comments <- function() {
+  cols <- c("expert", "round", "item", "comment", "theme")
   out <- as.data.frame(matrix(character(0), nrow = 0, ncol = length(cols)),
                        stringsAsFactors = FALSE)
   names(out) <- cols
@@ -138,6 +149,7 @@ template_instructions <- function(codes, layout, indicators, file) {
     )
     code <- paste0(
       "x <- read_delphi(\"", file, "\", sheet = \"ratings\", items_sheet = \"items\", ",
+      "comments_sheet = \"comments\", ",
       "expert_col = \"expert\", round_col = \"round\", indicator_col = \"indicator\", ",
       "scale = c(1, 10))"
     )
@@ -155,7 +167,8 @@ template_instructions <- function(codes, layout, indicators, file) {
     )
     code <- paste0(
       "x <- read_delphi(\"", file, "\", sheet = \"ratings\", layout = \"long\", ",
-      "items_sheet = \"items\", round_col = \"round\", indicator_col = \"indicator\", ",
+      "items_sheet = \"items\", comments_sheet = \"comments\", ",
+      "round_col = \"round\", indicator_col = \"indicator\", ",
       "scale = c(1, 10))"
     )
   }
@@ -173,8 +186,21 @@ template_instructions <- function(codes, layout, indicators, file) {
     "Write the full statement of each item next to its code. Statements are optional and are used in reports.",
     "Item codes can be changed, provided that the same codes are used in the sheet ratings.",
     "",
-    "Example (columns separated by |)",
+    "Sheet comments",
+    "Each row contains one comment: the expert, the round, the item and the text of the comment. Comments are optional.",
+    "Use the same expert identifiers as in the sheet ratings, so that each comment can be read next to the rating of its author.",
+    "Leave the item empty for general comments on the questionnaire. If an expert comments on several items, use one row per item.",
+    "The column theme is optional: after reading the comments, write a short label for the argument of each comment, for example regulation or costs. Separate several themes with a semicolon.",
+    "A column indicator can be added when comments refer to a single indicator, for example impact.",
+    "",
+    "Example of the sheet ratings (columns separated by |)",
     example,
+    "",
+    "Example of the sheet comments (columns separated by |)",
+    "expert | round | item | comment | theme",
+    paste0("EXP01 | 1 | ", ex_items[1L], " | Depends on the availability of public funding. | funding"),
+    paste0("EXP02 | 1 | ", ex_items[1L], " | Unlikely without new regulation. | regulation; time horizon"),
+    "EXP02 | 1 |  | The questionnaire was clear. |",
     "",
     "Import in R (adapt the scale to your study)",
     "library(DelphiR)",

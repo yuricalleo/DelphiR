@@ -6,8 +6,8 @@
 \alias{DelphiR-package}
 \title{DelphiR: Statistical Analysis of Delphi Studies}
 \description{
-DelphiR imports, validates and summarises the ratings collected in a
-Delphi study.
+DelphiR imports, validates and summarises the ratings and the comments
+collected in a Delphi study.
 }
 \section{The DelphiR data format}{
 
@@ -59,7 +59,12 @@ the next round.
 \item \code{\link[=delphi_plot_distribution]{delphi_plot_distribution()}}, \code{\link[=delphi_plot_trend]{delphi_plot_trend()}},
 \code{\link[=delphi_plot_consensus]{delphi_plot_consensus()}} and \code{\link[=delphi_plot_map]{delphi_plot_map()}}, or \code{plot()}:
 publication-quality figures built with \pkg{ggplot2}.
+\item \code{\link[=delphi_add_comments]{delphi_add_comments()}}: written comments of the experts, analysed with
+\code{\link[=delphi_comments]{delphi_comments()}}, \code{\link[=delphi_comment_counts]{delphi_comment_counts()}}, \code{\link[=delphi_themes]{delphi_themes()}},
+\code{\link[=delphi_words]{delphi_words()}} and \code{\link[=delphi_plot_comments]{delphi_plot_comments()}}.
 \item \code{\link[=delphi_report]{delphi_report()}}: a self-contained round report in HTML or Word format.
+\item \code{\link[=delphi_feedback]{delphi_feedback()}}: controlled feedback for the experts before a
+further round.
 \item \code{\link[=delphi_wide]{delphi_wide()}} and \code{as.data.frame()}: back to wide or long tables.
 }
 

@@ -11,6 +11,7 @@ read_delphi(
   layout = c("wide", "long"),
   header_rows = 1,
   items_sheet = NULL,
+  comments_sheet = NULL,
   indicator_names = NULL,
   item_prefix = "E",
   sep = NULL,
@@ -36,6 +37,13 @@ Description.}
 statements, in two columns named \code{item} and \code{statement}, as in the
 template created by \code{\link[=delphi_template]{delphi_template()}}. The statements are stored as
 item labels and used in reports.}
+
+\item{comments_sheet}{For Excel files, an optional sheet with the comments
+of the experts, in the long layout of \code{\link[=delphi_add_comments]{delphi_add_comments()}}: columns
+named \code{expert}, \code{item} and \code{comment}, and optionally \code{round},
+\code{indicator} and \code{theme}, as in the template created by
+\code{\link[=delphi_template]{delphi_template()}}. When the sheet has no \code{round} column, the comments
+are assigned to the round given in \code{round}. An empty sheet is ignored.}
 
 \item{indicator_names}{For \code{header_rows = 2}, an optional named character
 vector that renames the indicators found in the first header row, for

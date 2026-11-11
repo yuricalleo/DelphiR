@@ -1,0 +1,70 @@
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+fb <- cfg$feedback
+cm <- attr(fb, "comments")
+scales_fb <- attr(fb, "scales")
+items_fb <- unique(fb$item)
+r_fb <- max(fb$round)
+num <- function(v) sub("\\.?0+$", "", formatC(round(v, 2), format = "f", digits = 2))
+cap <- function(s) paste0(toupper(substring(s, 1, 1)), substring(s, 2))
+n_items_txt <- if (length(items_fb) == 1) "the item" else paste0("the ", length(items_fb), " items")
+share_txt <- paste0(format(100 * cfg$threshold), "%")
+denominator <- if (cfg$relative_to == "points") {
+  "the number of points of the rating scale"
+} else {
+  "the range of the rating scale"
+}
+with_comments <- nrow(cm) > 0
+```
+
+Thank you for taking part in round `r r_fb` of this Delphi study. This
+document summarises the answers of the panel on `r n_items_txt` that will
+be rated again in the next round.
+
+For each item, you will find the median rating of the panel and the
+middle half of the ratings, from the first to the third quartile: half of
+the experts gave a rating within this interval. A narrow interval means that
+the experts largely agree, a wide one that their opinions are divided. The
+panel is considered to have reached consensus when the width of the
+interval does not exceed `r share_txt` of `r denominator`.
+`r if (with_comments) "The comments written by the experts are reported anonymously, as they were written."`
+
+Please read this feedback before giving your ratings in the next round. You
+may confirm or revise your previous ratings. If your rating differs markedly
+from those of the panel, you are encouraged to explain your reasons in a
+comment.
+
+```{r items, results = "asis"}
+for (it in items_fb) {
+  rows <- fb[fb$item == it, , drop = FALSE]
+  cat("\n# Item ", it, "\n\n", sep = "")
+  if (!is.na(rows$statement[1])) {
+    cat(md_escape(rows$statement[1]), "\n\n", sep = "")
+  }
+  out <- data.frame(
+    Indicator = cap(rows$indicator),
+    `Rating scale` = vapply(rows$indicator, function(i) {
+      paste0("from ", scales_fb[[i]][1], " to ", scales_fb[[i]][2])
+    }, character(1)),
+    Median = num(rows$median),
+    `Middle half of the ratings` = paste0("from ", num(rows$q1), " to ", num(rows$q3)),
+    Consensus = ifelse(rows$consensus %in% TRUE, "Yes", "No"),
+    check.names = FALSE
+  )
+  cat(md_table(out), sep = "\n")
+  cat("\n")
+  if (with_comments) {
+    ci <- cm[cm$item == it, , drop = FALSE]
+    cat("**Comments from the panel**\n\n")
+    if (nrow(ci) == 0) {
+      cat("No comments were written on this item.\n\n")
+    } else {
+      for (k in seq_len(nrow(ci))) {
+        cat("* ", md_escape(ci$comment[k]), "\n", sep = "")
+      }
+      cat("\n")
+    }
+  }
+}
+```

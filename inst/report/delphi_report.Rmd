@@ -5,47 +5,7 @@ knitr::opts_chunk$set(
   fig.align = if (knitr::is_html_output()) "center" else "default"
 )
 
-# Pipe table with explicit relative column widths. Each column is at least
-# as wide as the longest word of its header and its longest entry, and the
-# separator line is made longer than Pandoc's 72 columns so that the table
-# spans the text width in both HTML and Word.
-tab <- function(df, digits = 2) {
-  cells <- lapply(df, function(v) {
-    if (is.double(v)) {
-      out <- formatC(round(v, digits), format = "f", digits = digits)
-      out <- sub("\\.?0+$", "", out)
-    } else {
-      out <- as.character(v)
-    }
-    out[is.na(v)] <- ""
-    out
-  })
-  hdr <- names(df)
-  right <- vapply(df, is.numeric, logical(1))
-  w <- mapply(function(h, v) {
-    max(c(nchar(strsplit(h, " ", fixed = TRUE)[[1]]), nchar(v), 4)) + 3
-  }, hdr, cells)
-  # Long statements wrap inside their cell instead of squeezing the short
-  # columns: when the table is too wide, only columns wider than 14
-  # characters are narrowed
-  w <- pmin(w, 40)
-  if (sum(w) > 78) {
-    big <- w > 14
-    room <- sum(w[big] - 14)
-    if (room > 0) {
-      w[big] <- w[big] - (w[big] - 14) * min(1, (sum(w) - 78) / room)
-    }
-  }
-  w <- ceiling(w)
-  if (sum(w + 3) < 80) w <- ceiling(w * 80 / sum(w + 3))
-  sep <- ifelse(right, paste0(strrep("-", w - 1), ":"),
-                paste0(":", strrep("-", w - 1)))
-  row <- function(v) paste0("| ", paste(v, collapse = " | "), " |")
-  rows <- vapply(seq_len(nrow(df)), function(i) {
-    row(vapply(cells, `[`, character(1), i))
-  }, character(1))
-  c("", row(hdr), row(sep), rows, "")
-}
+tab <- md_table
 
 pct <- function(v, digits = 0) {
   ifelse(is.na(v), "", paste0(formatC(100 * v, format = "f", digits = digits), "%"))
@@ -386,6 +346,141 @@ if (nrow(nr) == 0) {
   }
   cat(tab(nr_out), sep = "\n")
   cat("\n")
+}
+```
+
+```{r comments-setup, include = FALSE}
+show_comments <- has_comments(x)
+if (show_comments) {
+  cm_rounds <- sort(unique(obj_comments(x)$round))
+  r_ass <- max(unlist(assessed))
+  r_c <- if (r_ass %in% cm_rounds) r_ass else max(cm_rounds)
+  cm_all <- delphi_comments(x, round = r_c, type = cfg$type)
+  cm_counts <- delphi_comment_counts(x, round = r_c, type = cfg$type)
+  cm_counts <- cm_counts[cm_counts$n_comments > 0, , drop = FALSE]
+  comments_height <- 1.8 + 0.25 * max(nrow(cm_counts), 1)
+} else {
+  comments_height <- 3
+}
+position_txt <- function(row) {
+  pos <- vapply(inds, function(i) {
+    p <- row[[paste0(i, "_position")]]
+    if (is.na(p)) NA_character_ else paste(i, p)
+  }, character(1))
+  pos <- pos[!is.na(pos)]
+  if (length(pos) == 0) "" else paste0("*Rating: ", paste(pos, collapse = ", "), ".* ")
+}
+```
+
+```{r comments, results = "asis", fig.height = comments_height}
+if (show_comments) {
+  cat("\n# Expert comments\n\n")
+  n_cm <- sum(!is.na(cm_all$item))
+  n_gen <- sum(is.na(cm_all$item))
+  n_auth <- length(unique(cm_all$expert))
+  on_txt <- if (nrow(cm_counts) == n_items) {
+    if (n_items == 1) "on the item" else paste0("on all ", n_items, " items")
+  } else {
+    paste0("on ", nrow(cm_counts), " of the ", n_items, " items")
+  }
+  cat(
+    "In round ", r_c, ", ", plural(n_auth, "expert"), " wrote ",
+    plural(n_cm, "comment"), " ", on_txt,
+    if (n_gen > 0) paste0(", and ", plural(n_gen, "general comment")),
+    ". Comments are reported anonymously. For each comment, the report ",
+    "indicates whether the rating given by its author to the same item lies ",
+    "below the first quartile, within the interquartile range or above the ",
+    "third quartile of the ratings of the panel: comments from experts ",
+    "outside the interquartile range present the arguments of the minority.\n\n",
+    sep = ""
+  )
+  if (nrow(cm_counts) > 0) {
+    cc_out <- data.frame(
+      Item = cm_counts$item,
+      Comments = cm_counts$n_comments,
+      Experts = cm_counts$n_experts,
+      `Share of the raters` = pct(cm_counts$share_experts),
+      `From outside the IQR` = cm_counts$n_outside,
+      check.names = FALSE
+    )
+    cat("**Table.** Comments by item. Comments from outside the IQR are those ",
+        "whose author's rating lies outside the interquartile range on at ",
+        "least one indicator.\n\n", sep = "")
+    cat(tab(cc_out), sep = "\n")
+    cat("\n\n")
+    print(delphi_plot_comments(x, round = r_c, type = cfg$type))
+    cat("\n\n")
+  }
+
+  if (any(!is.na(cm_all$theme))) {
+    th <- delphi_themes(x, round = r_c, by = "theme", type = cfg$type)
+    th_out <- data.frame(
+      Theme = th$theme,
+      Comments = th$n_comments,
+      Experts = th$n_experts,
+      Items = th$items,
+      `From outside the IQR` = th$n_outside,
+      check.names = FALSE
+    )
+    cat("## Themes\n\n")
+    cat("The comments were coded into themes by the researchers. A comment ",
+        "coded with several themes is counted once for each of them.\n\n", sep = "")
+    cat("**Table.** Themes of the comments.\n\n")
+    cat(tab(th_out), sep = "\n")
+    cat("\n\n")
+  }
+
+  wd <- delphi_words(x, round = r_c, top = 15)
+  if (nrow(wd) > 0) {
+    cat("## Most frequent words\n\n")
+    cat("Word frequencies are computed after removing common English and Italian ",
+        "words, such as articles and prepositions. They give a descriptive ",
+        "overview of the content of the comments and do not replace their ",
+        "reading.\n\n", sep = "")
+    cat("**Table.** The most frequent words in the comments.\n\n")
+    cat(tab(data.frame(Word = wd$word, Occurrences = wd$n, Comments = wd$n_comments)),
+        sep = "\n")
+    cat("\n\n")
+  }
+
+  if (cfg$comments != "none") {
+    nr_items <- unique(st$item[st$next_round])
+    if (cfg$comments == "next_round") {
+      cat("## Comments on the items for the next round\n\n")
+      list_items <- x$items[x$items %in% nr_items]
+    } else {
+      cat("## Comments on the items\n\n")
+      list_items <- x$items
+    }
+    sel_items <- list_items[list_items %in% cm_all$item]
+    if (cfg$comments == "next_round" && length(nr_items) == 0) {
+      cat("No item requires a further round, so no comments are listed here.\n\n")
+    } else if (length(sel_items) == 0) {
+      cat("No comments were written on these items.\n\n")
+    }
+    for (it in sel_items) {
+      lab <- if (!is.null(cfg$item_labels) && !is.na(cfg$item_labels[it])) {
+        paste0(" ", md_escape(cfg$item_labels[[it]]))
+      } else {
+        ""
+      }
+      cat("**", it, ".**", lab, "\n\n", sep = "")
+      rows <- cm_all[cm_all$item %in% it, , drop = FALSE]
+      for (k in seq_len(nrow(rows))) {
+        cat("* ", position_txt(rows[k, , drop = FALSE]), md_escape(rows$comment[k]),
+            "\n", sep = "")
+      }
+      cat("\n")
+    }
+    gen <- cm_all[is.na(cm_all$item), , drop = FALSE]
+    if (nrow(gen) > 0) {
+      cat("## General comments\n\n")
+      for (k in seq_len(nrow(gen))) {
+        cat("* ", md_escape(gen$comment[k]), "\n", sep = "")
+      }
+      cat("\n")
+    }
+  }
 }
 ```
 

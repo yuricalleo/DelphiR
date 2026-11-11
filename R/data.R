@@ -25,3 +25,30 @@
 #'                  scale = list(impact = c(1, 10), plausibility = c(1, 100)))
 #' x
 "delphi_example"
+
+
+#' Comments of the example Delphi study
+#'
+#' @description
+#' Synthetic comments written by the experts of [`delphi_example`] in round 2,
+#' in the long layout read by [delphi_add_comments()]. Each comment has been
+#' coded with one or more themes, separated by a semicolon. The last comment
+#' is a general comment on the questionnaire and refers to no item.
+#'
+#' @format A data frame with 11 rows and 5 columns:
+#' \describe{
+#'   \item{expert}{Expert identifier, as in [`delphi_example`].}
+#'   \item{round}{Round number (2).}
+#'   \item{item}{Item code, `NA` for the general comment.}
+#'   \item{comment}{Text of the comment.}
+#'   \item{theme}{Themes assigned by the researchers.}
+#' }
+#' @source Simulated data; see `data-raw/delphi_example_comments.R` in the
+#'   package sources.
+#' @examples
+#' x <- delphi_data(delphi_example, expert_col = "expert",
+#'                  round_col = "round", indicator_col = "indicator",
+#'                  scale = list(impact = c(1, 10), plausibility = c(1, 100)))
+#' x <- delphi_add_comments(x, delphi_example_comments)
+#' delphi_comments(x, items = "E7", general = FALSE)
+"delphi_example_comments"

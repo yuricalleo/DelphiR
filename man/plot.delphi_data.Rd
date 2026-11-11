@@ -4,7 +4,7 @@
 \alias{plot.delphi_data}
 \title{Plot a Delphi data object}
 \usage{
-\method{plot}{delphi_data}(x, type = c("distribution", "trend", "consensus", "map"), ...)
+\method{plot}{delphi_data}(x, type = c("distribution", "trend", "consensus", "map", "comments"), ...)
 }
 \arguments{
 \item{x}{A \code{delphi_data} object.}
@@ -23,7 +23,8 @@ Draws one of the DelphiR figures. This is a shortcut for the
 \item \code{"distribution"}: \code{\link[=delphi_plot_distribution]{delphi_plot_distribution()}};
 \item \code{"trend"}: \code{\link[=delphi_plot_trend]{delphi_plot_trend()}};
 \item \code{"consensus"}: \code{\link[=delphi_plot_consensus]{delphi_plot_consensus()}};
-\item \code{"map"}: \code{\link[=delphi_plot_map]{delphi_plot_map()}}.
+\item \code{"map"}: \code{\link[=delphi_plot_map]{delphi_plot_map()}};
+\item \code{"comments"}: \code{\link[=delphi_plot_comments]{delphi_plot_comments()}}, for objects with comments.
 }
 }
 \examples{

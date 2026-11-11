@@ -29,6 +29,12 @@ print.delphi_data <- function(x, ...) {
   cat("  Items:      ", length(items), " (", item_txt, ")\n", sep = "")
   cat("  Indicators: ", ind_txt, "\n", sep = "")
   cat("  Ratings:    ", sum(!is.na(d$value)), " (", sum(is.na(d$value)), " missing)\n", sep = "")
+  if (has_comments(x)) {
+    cm <- obj_comments(x)
+    per_round <- table(cm$round)
+    cat("  Comments:   ", paste0(per_round, " (round ", names(per_round), ")", collapse = ", "),
+        if (any(!is.na(cm$theme))) "; coded with themes" else "", "\n", sep = "")
+  }
   cat("Use summary() for descriptive statistics.\n")
   invisible(x)
 }

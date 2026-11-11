@@ -31,9 +31,19 @@ reference:
       - delphi_plot_consensus
       - delphi_plot_map
       - theme_delphi
-  - title: Reports
+  - title: Expert comments
+    contents:
+      - delphi_add_comments
+      - delphi_comments
+      - delphi_comment_counts
+      - delphi_themes
+      - delphi_words
+      - delphi_plot_comments
+  - title: Reports and feedback
     contents:
       - delphi_report
+      - delphi_feedback
   - title: Data
     contents:
       - delphi_example
+      - delphi_example_comments

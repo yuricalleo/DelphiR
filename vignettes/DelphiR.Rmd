@@ -273,12 +273,61 @@ the impact-plausibility matrices used in foresight studies.
 plot(x, type = "map")
 ```
 
+# Expert comments
+
+Delphi questionnaires usually invite the experts to justify their ratings in
+a written comment. DelphiR stores the comments next to the ratings, so that
+each comment can be read together with the rating given by its author. The
+recommended layout has one row per comment, with the expert, the round, the
+item and the text of the comment; an empty item denotes a general comment
+on the questionnaire. This is the layout of the `comments` sheet of the
+template, which `read_delphi()` reads with `comments_sheet = "comments"`.
+Survey platforms that export one comment column per item are handled by
+`delphi_add_comments(layout = "wide")`.
+
+```{r comments-add}
+head(delphi_example_comments, 3)
+x <- delphi_add_comments(x, delphi_example_comments)
+x
+```
+
+`delphi_comments()` lists the comments with the rating of their author on
+every indicator, and its position relative to the ratings of the panel:
+below the first quartile, within the interquartile range or above the third
+quartile. Comments from experts outside the interquartile range present the
+arguments of the minority, which the Delphi method asks the rest of the
+panel to consider.
+
+```{r comments-list}
+delphi_comments(x, items = "E7", general = FALSE)
+```
+
+`delphi_comment_counts()` counts the comments received by each item, and
+`plot(x, type = "comments")` shows them split by the position of their
+authors.
+
+```{r comments-counts, fig.height = 4}
+delphi_comment_counts(x)
+plot(x, type = "comments")
+```
+
+The analysis of the content of the comments remains a task for the
+researchers. A common approach is to code each comment with one or more
+themes, written in a `theme` column and separated by semicolons;
+`delphi_themes()` then tabulates the themes by item or across items.
+`delphi_words()` gives a first, descriptive overview of the words used in
+the comments, after removing common English and Italian words.
+
+```{r comments-themes}
+delphi_themes(x, by = "theme")
+delphi_words(x, top = 8)
+```
+
 # Round report
 
 `delphi_report()` assembles the analyses above into a self-contained report
 in HTML or Microsoft Word format. The report states the criteria adopted,
-with references, and closes with the items to be submitted to the next
-round. Full item statements are taken from the labels stored in the data,
+with references, and lists the items to be submitted to the next round. Full item statements are taken from the labels stored in the data,
 as read from the items sheet of the template or from a file with two header
 rows, or can be supplied through `item_labels`.
 
@@ -293,6 +342,32 @@ delphi_report(
     E2 = "AI agents autonomously manage recruitment pipelines"
   )
 )
+```
+
+When the data contain comments, the report includes a section on them: the
+number of comments by item, the themes, the most frequent words and the
+comments on the items for the next round, each with the position of its
+author. Expert identifiers are never shown. All comments can be listed with
+`comments = "all"`.
+
+# Feedback for the next round
+
+Before a further round, the experts receive the controlled feedback of the
+current one. `delphi_feedback()` prepares it for the items that require a
+further round, or for the items chosen with `items`: the median and the
+quartiles of the panel on every indicator, whether consensus was reached,
+and the comments of the experts, reported anonymously. With `file`, the
+feedback is written to an HTML or Word document addressed to the experts,
+which explains these statistics in plain words.
+
+```{r feedback}
+fb <- delphi_feedback(x)
+fb
+attr(fb, "comments")
+```
+
+```{r feedback-file, eval = FALSE}
+delphi_feedback(x, file = "feedback_round3.docx")
 ```
 
 # References

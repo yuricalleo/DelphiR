@@ -31,6 +31,12 @@
 #'   statements, in two columns named `item` and `statement`, as in the
 #'   template created by [delphi_template()]. The statements are stored as
 #'   item labels and used in reports.
+#' @param comments_sheet For Excel files, an optional sheet with the comments
+#'   of the experts, in the long layout of [delphi_add_comments()]: columns
+#'   named `expert`, `item` and `comment`, and optionally `round`,
+#'   `indicator` and `theme`, as in the template created by
+#'   [delphi_template()]. When the sheet has no `round` column, the comments
+#'   are assigned to the round given in `round`. An empty sheet is ignored.
 #' @param indicator_names For `header_rows = 2`, an optional named character
 #'   vector that renames the indicators found in the first header row, for
 #'   example `c(IMPATTO = "impact", PROBAB = "probability")`. The names used
@@ -72,7 +78,7 @@
 #' y$labels
 #' @export
 read_delphi <- function(file, ..., sheet = 1, layout = c("wide", "long"),
-                        header_rows = 1, items_sheet = NULL,
+                        header_rows = 1, items_sheet = NULL, comments_sheet = NULL,
                         indicator_names = NULL, item_prefix = "E",
                         sep = NULL, dec = NULL, encoding = "UTF-8") {
   layout <- match.arg(layout)
@@ -89,7 +95,6 @@ read_delphi <- function(file, ..., sheet = 1, layout = c("wide", "long"),
     stop_dr("Files in the long layout must have a single header row.")
   }
   ext <- tolower(tools_file_ext(file))
-  header <- header_rows == 1
   dots <- list(...)
   if (!is.null(items_sheet)) {
     if (!ext %in% c("xlsx", "xls")) {
@@ -98,11 +103,27 @@ read_delphi <- function(file, ..., sheet = 1, layout = c("wide", "long"),
     if (header_rows == 2) {
       stop_dr("With `header_rows = 2`, item statements are read from the header; remove `items_sheet`.")
     }
-    if (!is.null(dots$item_labels)) {
+    if (!is.null(dots[["item_labels"]])) {
       stop_dr("Use either `items_sheet` or `item_labels`, not both.")
     }
-    dots$item_labels <- read_items_sheet(file, items_sheet)
+    dots[["item_labels"]] <- read_items_sheet(file, items_sheet)
   }
+  if (!is.null(comments_sheet) && !ext %in% c("xlsx", "xls")) {
+    stop_dr("`comments_sheet` can only be used with Excel files.")
+  }
+  x <- read_delphi_ratings(file, ext, dots, sheet = sheet, layout = layout,
+                           header_rows = header_rows, indicator_names = indicator_names,
+                           item_prefix = item_prefix, sep = sep, dec = dec,
+                           encoding = encoding)
+  if (is.null(comments_sheet)) {
+    return(x)
+  }
+  read_comments_sheet(x, file, comments_sheet, round = dots[["round"]])
+}
+
+read_delphi_ratings <- function(file, ext, dots, sheet, layout, header_rows,
+                                indicator_names, item_prefix, sep, dec, encoding) {
+  header <- header_rows == 1
 
   raw <- switch(ext,
     csv = ,
@@ -128,7 +149,7 @@ read_delphi <- function(file, ..., sheet = 1, layout = c("wide", "long"),
     )
   }
   st <- stack_two_header(raw, indicator_names = indicator_names,
-                         item_prefix = item_prefix, expert_col = dots$expert_col)
+                         item_prefix = item_prefix, expert_col = dots[["expert_col"]])
   do.call(delphi_data, c(
     list(st$data, indicator_col = ".indicator", items = st$items,
          item_labels = st$labels),
@@ -323,4 +344,34 @@ read_items_sheet <- function(file, sheet) {
     return(NULL)
   }
   stats::setNames(statement[keep], item[keep])
+}
+
+# Comments from an Excel sheet in the long layout of delphi_add_comments().
+# Column names are matched case-insensitively; an empty sheet is ignored.
+read_comments_sheet <- function(x, file, sheet, round = NULL) {
+  if (!requireNamespace("readxl", quietly = TRUE)) {
+    stop_dr(
+      "Reading Excel files requires the 'readxl' package. ",
+      "Install it with install.packages(\"readxl\")."
+    )
+  }
+  cm <- as.data.frame(readxl::read_excel(file, sheet = sheet, col_types = "text"),
+                      stringsAsFactors = FALSE)
+  names(cm) <- tolower(trimws(names(cm)))
+  need <- c("expert", "item", "comment")
+  missing <- setdiff(need, names(cm))
+  if (length(missing) > 0L) {
+    stop_dr(
+      "The sheet '", sheet, "' must have columns named 'expert', 'item' and 'comment' ",
+      "(missing: ", show_values(missing), ")."
+    )
+  }
+  text <- clean_text(cm$comment)
+  if (all(is.na(text))) {
+    return(x)
+  }
+  if ("round" %in% names(cm)) {
+    round <- NULL
+  }
+  delphi_add_comments(x, cm, round = round)
 }
