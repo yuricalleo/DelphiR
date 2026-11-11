@@ -86,6 +86,16 @@ See
 [`vignette("DelphiR")`](https://yuricalleo.github.io/DelphiR/articles/DelphiR.md)
 for an introduction to the complete workflow.
 
+## See also
+
+Useful links:
+
+- <https://github.com/yuricalleo/DelphiR>
+
+- <https://yuricalleo.github.io/DelphiR/>
+
+- Report bugs at <https://github.com/yuricalleo/DelphiR/issues>
+
 ## Author
 
 **Maintainer**: Yuri Calleo <yuri.calleo@unimercatorum.it> \[copyright

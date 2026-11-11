@@ -25,7 +25,7 @@ controlled feedback of the next round. The report contains:
 ``` r
 delphi_report(
   x,
-  file = "delphi_report.html",
+  file,
   title = "Delphi study: round report",
   author = NULL,
   round = NULL,

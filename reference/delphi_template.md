@@ -19,7 +19,7 @@ CSV templates contain the `ratings` table only.
 
 ``` r
 delphi_template(
-  file = "delphi_template.xlsx",
+  file,
   items = 10,
   layout = c("wide", "long"),
   indicators = c("impact", "probability"),
@@ -78,7 +78,7 @@ if (requireNamespace("writexl", quietly = TRUE)) {
                           items = 8, indicators = c("impact", "probability"))
   path
 }
-#> [1] "/tmp/Rtmp8NUK8k/delphi_template.xlsx"
+#> [1] "/tmp/Rtmp7L5zcF/delphi_template.xlsx"
 # }
 # A CSV template in the long layout
 path <- delphi_template(file.path(tempdir(), "delphi_long.csv"), layout = "long")
