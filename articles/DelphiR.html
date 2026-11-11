@@ -695,6 +695,22 @@ explains these statistics in plain words.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/delphi_feedback.html">delphi_feedback</a></span><span class="op">(</span><span class="va">x</span>, file <span class="op">=</span> <span class="st">"feedback_round3.docx"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="interactive-application">Interactive application<a class="anchor" aria-label="anchor" href="#interactive-application"></a>
+</h2>
+<p><code><a href="../reference/run_app.html">run_app()</a></code> opens the same workflow in an application in
+the web browser, for users who prefer not to write code. The ratings are
+imported by choosing the columns of the file that hold the experts, the
+rounds, the indicators and the items; rounds stored in separate sheets
+or files are added one at a time, and comments can be added in either
+layout. The criteria for consensus and stability are set in a sidebar
+and apply to every table, figure and report. The application also writes
+the R code that reproduces the analysis, so that the results can be
+documented and repeated.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>   <span class="co"># open a study already imported in R</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <p>Scheibe, M., Skutsch, M. and Schofer, J. (1975). Experiments in

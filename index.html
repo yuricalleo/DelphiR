@@ -152,6 +152,14 @@
 <p>See <code><a href="articles/DelphiR.html">vignette("DelphiR")</a></code> for an introduction to the complete workflow.</p>
 </div>
 <div class="section level2">
+<h2 id="interactive-application">Interactive application<a class="anchor" aria-label="anchor" href="#interactive-application"></a>
+</h2>
+<p><code><a href="reference/run_app.html">run_app()</a></code> opens an application in the web browser that covers the same workflow without writing code: import of the ratings and comments by choosing the columns of the file, tables, figures, the analysis of the comments, the round report and the feedback for the experts. The application also writes the R code that reproduces the analysis.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages(c("shiny", "bslib", "DT"))</span></span>
+<span><span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="consensus-and-stability">Consensus and stability<a class="anchor" aria-label="anchor" href="#consensus-and-stability"></a>
 </h2>
 <p>By default, an item reaches consensus when its interquartile range (IQR) does not exceed 20% of the rating scale (von der Gracht, 2012). The scale is measured by its number of points, so that the threshold corresponds to an IQR of at most 1 on a five-point scale and at most 2 on a ten-point scale.</p>

@@ -2,6 +2,19 @@
 
 ## DelphiR (development version)
 
+### Interactive application
+
+- [`run_app()`](https://yuricalleo.github.io/DelphiR/reference/run_app.md)
+  opens an interactive application that covers the whole workflow
+  without writing code: import of the ratings from CSV or Excel files by
+  choosing the columns, rounds added one at a time from separate sheets
+  or files, comments in the long or wide layout, descriptive statistics,
+  consensus, stability and item status with adjustable criteria, figures
+  downloadable as PNG or PDF files, the analysis of the comments, the
+  round report and the feedback for the experts. The application also
+  writes the R code that reproduces the analysis. It requires the
+  ‘shiny’, ‘bslib’ and ‘DT’ packages.
+
 ### Expert comments
 
 - [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md)

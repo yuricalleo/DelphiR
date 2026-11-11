@@ -653,6 +653,25 @@ attr(fb, "comments")
 delphi_feedback(x, file = "feedback_round3.docx")
 ```
 
+## Interactive application
+
+[`run_app()`](https://yuricalleo.github.io/DelphiR/reference/run_app.md)
+opens the same workflow in an application in the web browser, for users
+who prefer not to write code. The ratings are imported by choosing the
+columns of the file that hold the experts, the rounds, the indicators
+and the items; rounds stored in separate sheets or files are added one
+at a time, and comments can be added in either layout. The criteria for
+consensus and stability are set in a sidebar and apply to every table,
+figure and report. The application also writes the R code that
+reproduces the analysis, so that the results can be documented and
+repeated.
+
+``` r
+
+run_app()
+run_app(x)   # open a study already imported in R
+```
+
 ## References
 
 Scheibe, M., Skutsch, M. and Schofer, J. (1975). Experiments in Delphi

@@ -95,6 +95,9 @@ as not linked (`linked = FALSE`).
   and [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html):
   back to wide or long tables.
 
+- [`run_app()`](https://yuricalleo.github.io/DelphiR/reference/run_app.md):
+  an interactive application for the whole workflow.
+
 See
 [`vignette("DelphiR")`](https://yuricalleo.github.io/DelphiR/articles/DelphiR.md)
 for an introduction to the complete workflow.

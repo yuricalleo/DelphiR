@@ -76,6 +76,11 @@
 - [`delphi_feedback()`](https://yuricalleo.github.io/DelphiR/reference/delphi_feedback.md)
   : Controlled feedback for the next round
 
+## Interactive application
+
+- [`run_app()`](https://yuricalleo.github.io/DelphiR/reference/run_app.md)
+  : Interactive application
+
 ## Data
 
 - [`delphi_example`](https://yuricalleo.github.io/DelphiR/reference/delphi_example.md)
