@@ -4,8 +4,9 @@ DelphiR is an R package for the statistical analysis of Delphi studies.
 It imports and validates the expert ratings, computes descriptive
 statistics by item, round and indicator, assesses consensus and
 stability, identifies the items to be submitted to a further round,
-draws publication-quality figures and generates a complete round report
-in HTML or Word format.
+analyses the written comments of the experts, draws publication-quality
+figures, and generates a complete round report in HTML or Word format
+and the controlled feedback for the next round.
 
 ## Installation
 
@@ -79,8 +80,14 @@ plot(x, type = "trend", indicator = "impact")
 plot(x, type = "consensus")
 plot(x, type = "map")
 
-# Round report in Word or HTML format
+# Expert comments, next to the rating of their author
+x <- delphi_add_comments(x, delphi_example_comments)
+delphi_comments(x)
+delphi_themes(x, by = "theme")
+
+# Round report and feedback for the experts, in Word or HTML format
 delphi_report(x, "round2_report.docx")
+delphi_feedback(x, "feedback_round3.docx")
 ```
 
 See

@@ -103,7 +103,12 @@ An object of class `delphi_data`: a list with elements
 
 - `labels`: full item statements, named by item (`NA` when not given);
 
-- `linked`: whether experts are linked across rounds.
+- `linked`: whether experts are linked across rounds;
+
+- `comments`: the comments of the experts, when added with
+  [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md)
+  or read with
+  [`read_delphi()`](https://yuricalleo.github.io/DelphiR/reference/read_delphi.md).
 
 ## Details
 

@@ -31,6 +31,7 @@ read_delphi(
   layout = c("wide", "long"),
   header_rows = 1,
   items_sheet = NULL,
+  comments_sheet = NULL,
   indicator_names = NULL,
   item_prefix = "E",
   sep = NULL,
@@ -72,6 +73,17 @@ read_delphi(
   columns named `item` and `statement`, as in the template created by
   [`delphi_template()`](https://yuricalleo.github.io/DelphiR/reference/delphi_template.md).
   The statements are stored as item labels and used in reports.
+
+- comments_sheet:
+
+  For Excel files, an optional sheet with the comments of the experts,
+  in the long layout of
+  [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md):
+  columns named `expert`, `item` and `comment`, and optionally `round`,
+  `indicator` and `theme`, as in the template created by
+  [`delphi_template()`](https://yuricalleo.github.io/DelphiR/reference/delphi_template.md).
+  When the sheet has no `round` column, the comments are assigned to the
+  round given in `round`. An empty sheet is ignored.
 
 - indicator_names:
 

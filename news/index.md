@@ -1,5 +1,43 @@
 # Changelog
 
+## DelphiR (development version)
+
+### Expert comments
+
+- [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md)
+  attaches the written comments of the experts to a `delphi_data`
+  object, from a table with one row per comment or from a survey export
+  with one comment column per item. Comments can be coded with one or
+  more themes.
+- `read_delphi(comments_sheet = )` reads the comments from a sheet of
+  the same Excel file, and
+  [`delphi_template()`](https://yuricalleo.github.io/DelphiR/reference/delphi_template.md)
+  now includes a `comments` sheet.
+- [`delphi_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comments.md)
+  lists the comments with the rating of their author and its position
+  relative to the interquartile range of the panel.
+- [`delphi_comment_counts()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comment_counts.md),
+  [`delphi_themes()`](https://yuricalleo.github.io/DelphiR/reference/delphi_themes.md)
+  and
+  [`delphi_words()`](https://yuricalleo.github.io/DelphiR/reference/delphi_words.md)
+  count the comments by item, tabulate the themes and compute word
+  frequencies, with common English and Italian words removed.
+- [`delphi_plot_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_comments.md)
+  and `plot(type = "comments")` show the number of comments by item,
+  split by the position of their authors.
+- [`delphi_report()`](https://yuricalleo.github.io/DelphiR/reference/delphi_report.md)
+  includes a section on the comments when they are available; the new
+  argument `comments` chooses which comments are listed.
+- Example dataset `delphi_example_comments`.
+
+### Feedback for the next round
+
+- [`delphi_feedback()`](https://yuricalleo.github.io/DelphiR/reference/delphi_feedback.md)
+  prepares the controlled feedback for the experts: median, quartiles
+  and consensus of the items that require a further round, with the
+  comments of the panel reported anonymously, as a table or as an HTML
+  or Word document.
+
 ## DelphiR 0.1.0
 
 First release.

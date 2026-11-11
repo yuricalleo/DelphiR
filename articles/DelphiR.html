@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DelphiR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Introduction to DelphiR</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/yuricalleo/DelphiR/blob/v0.1.0/vignettes/DelphiR.Rmd" class="external-link"><code>vignettes/DelphiR.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/yuricalleo/DelphiR/blob/main/vignettes/DelphiR.Rmd" class="external-link"><code>vignettes/DelphiR.Rmd</code></a></small>
       <div class="d-none name"><code>DelphiR.Rmd</code></div>
     </div>
 
@@ -536,16 +536,118 @@ as in the impact-plausibility matrices used in foresight studies.</p>
 <p><img src="DelphiR_files/figure-html/fig-map-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level2">
+<h2 id="expert-comments">Expert comments<a class="anchor" aria-label="anchor" href="#expert-comments"></a>
+</h2>
+<p>Delphi questionnaires usually invite the experts to justify their
+ratings in a written comment. DelphiR stores the comments next to the
+ratings, so that each comment can be read together with the rating given
+by its author. The recommended layout has one row per comment, with the
+expert, the round, the item and the text of the comment; an empty item
+denotes a general comment on the questionnaire. This is the layout of
+the <code>comments</code> sheet of the template, which
+<code><a href="../reference/read_delphi.html">read_delphi()</a></code> reads with
+<code>comments_sheet = "comments"</code>. Survey platforms that export
+one comment column per item are handled by
+<code>delphi_add_comments(layout = "wide")</code>.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">delphi_example_comments</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   expert round item</span></span>
+<span><span class="co">#&gt; 1  EXP01     2   E7</span></span>
+<span><span class="co">#&gt; 2  EXP10     2   E7</span></span>
+<span><span class="co">#&gt; 3  EXP13     2   E7</span></span>
+<span><span class="co">#&gt;                                                                                comment</span></span>
+<span><span class="co">#&gt; 1 Adoption will be slower than expected, because most firms lack the necessary skills.</span></span>
+<span><span class="co">#&gt; 2              The technology is already available, and its costs are falling quickly.</span></span>
+<span><span class="co">#&gt; 3                    New regulation in the European Union will accelerate this change.</span></span>
+<span><span class="co">#&gt;                  theme</span></span>
+<span><span class="co">#&gt; 1 skills; time horizon</span></span>
+<span><span class="co">#&gt; 2                costs</span></span>
+<span><span class="co">#&gt; 3           regulation</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delphi_add_comments.html">delphi_add_comments</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">delphi_example_comments</span><span class="op">)</span></span>
+<span><span class="va">x</span></span>
+<span><span class="co">#&gt; &lt;delphi_data&gt;</span></span>
+<span><span class="co">#&gt;   Experts:    15</span></span>
+<span><span class="co">#&gt;   Rounds:     2 (1, 2)</span></span>
+<span><span class="co">#&gt;   Items:      8 (E1, E2, E3, E4, E5, ..., E8)</span></span>
+<span><span class="co">#&gt;   Indicators: impact (from 1 to 10), plausibility (from 1 to 100)</span></span>
+<span><span class="co">#&gt;   Ratings:    445 (3 missing)</span></span>
+<span><span class="co">#&gt;   Comments:   11 (round 2); coded with themes</span></span>
+<span><span class="co">#&gt; Use summary() for descriptive statistics.</span></span></code></pre></div>
+<p><code><a href="../reference/delphi_comments.html">delphi_comments()</a></code> lists the comments with the rating of
+their author on every indicator, and its position relative to the
+ratings of the panel: below the first quartile, within the interquartile
+range or above the third quartile. Comments from experts outside the
+interquartile range present the arguments of the minority, which the
+Delphi method asks the rest of the panel to consider.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/delphi_comments.html">delphi_comments</a></span><span class="op">(</span><span class="va">x</span>, items <span class="op">=</span> <span class="st">"E7"</span>, general <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;delphi_comments&gt; 3 comment(s)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Round 2, item E7</span></span>
+<span><span class="co">#&gt;   [EXP01]: impact below Q1, plausibility below Q1 (theme: skills; time horizon)</span></span>
+<span><span class="co">#&gt;     Adoption will be slower than expected, because most firms lack the</span></span>
+<span><span class="co">#&gt;     necessary skills.</span></span>
+<span><span class="co">#&gt;   [EXP10]: impact above Q3, plausibility above Q3 (theme: costs)</span></span>
+<span><span class="co">#&gt;     The technology is already available, and its costs are falling</span></span>
+<span><span class="co">#&gt;     quickly.</span></span>
+<span><span class="co">#&gt;   [EXP13]: impact within IQR, plausibility above Q3 (theme: regulation)</span></span>
+<span><span class="co">#&gt;     New regulation in the European Union will accelerate this change.</span></span></code></pre></div>
+<p><code><a href="../reference/delphi_comment_counts.html">delphi_comment_counts()</a></code> counts the comments received by
+each item, and <code>plot(x, type = "comments")</code> shows them split
+by the position of their authors.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/delphi_comment_counts.html">delphi_comment_counts</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  round item n_comments n_experts n_raters share_experts n_outside</span></span>
+<span><span class="co">#&gt;      2   E1          1         1       13          0.08         0</span></span>
+<span><span class="co">#&gt;      2   E2          2         2       13          0.15         2</span></span>
+<span><span class="co">#&gt;      2   E3          1         1       13          0.08         0</span></span>
+<span><span class="co">#&gt;      2   E4          0         0       13          0.00         0</span></span>
+<span><span class="co">#&gt;      2   E5          3         3       13          0.23         0</span></span>
+<span><span class="co">#&gt;      2   E6          0         0       13          0.00         0</span></span>
+<span><span class="co">#&gt;      2   E7          3         3       13          0.23         3</span></span>
+<span><span class="co">#&gt;      2   E8          0         0       13          0.00         0</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"comments"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="DelphiR_files/figure-html/comments-counts-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The analysis of the content of the comments remains a task for the
+researchers. A common approach is to code each comment with one or more
+themes, written in a <code>theme</code> column and separated by
+semicolons; <code><a href="../reference/delphi_themes.html">delphi_themes()</a></code> then tabulates the themes by
+item or across items. <code><a href="../reference/delphi_words.html">delphi_words()</a></code> gives a first,
+descriptive overview of the words used in the comments, after removing
+common English and Italian words.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/delphi_themes.html">delphi_themes</a></span><span class="op">(</span><span class="va">x</span>, by <span class="op">=</span> <span class="st">"theme"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   round              theme n_comments n_experts n_outside n_items  items</span></span>
+<span><span class="co">#&gt; 1     2              costs          2         2         1       2 E3, E7</span></span>
+<span><span class="co">#&gt; 2     2         regulation          2         2         2       2 E2, E7</span></span>
+<span><span class="co">#&gt; 3     2       time horizon          2         2         1       1     E7</span></span>
+<span><span class="co">#&gt; 4     2            wording          2         2         0       2 E1, E5</span></span>
+<span><span class="co">#&gt; 5     2   current practice          1         1         1       1     E2</span></span>
+<span><span class="co">#&gt; 6     2 sector differences          1         1         0       1     E5</span></span>
+<span><span class="co">#&gt; 7     2             skills          1         1         1       1     E7</span></span>
+<span><span class="co">#&gt; 8     2        uncertainty          1         1         0       1     E5</span></span>
+<span><span class="fu"><a href="../reference/delphi_words.html">delphi_words</a></span><span class="op">(</span><span class="va">x</span>, top <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           word n n_comments</span></span>
+<span><span class="co">#&gt; 1      already 2          2</span></span>
+<span><span class="co">#&gt; 2        costs 2          2</span></span>
+<span><span class="co">#&gt; 3        firms 2          2</span></span>
+<span><span class="co">#&gt; 4        first 2          2</span></span>
+<span><span class="co">#&gt; 5   accelerate 1          1</span></span>
+<span><span class="co">#&gt; 6     adoption 1          1</span></span>
+<span><span class="co">#&gt; 7 arrangements 1          1</span></span>
+<span><span class="co">#&gt; 8    available 1          1</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="round-report">Round report<a class="anchor" aria-label="anchor" href="#round-report"></a>
 </h2>
 <p><code><a href="../reference/delphi_report.html">delphi_report()</a></code> assembles the analyses above into a
 self-contained report in HTML or Microsoft Word format. The report
-states the criteria adopted, with references, and closes with the items
-to be submitted to the next round. Full item statements are taken from
-the labels stored in the data, as read from the items sheet of the
-template or from a file with two header rows, or can be supplied through
+states the criteria adopted, with references, and lists the items to be
+submitted to the next round. Full item statements are taken from the
+labels stored in the data, as read from the items sheet of the template
+or from a file with two header rows, or can be supplied through
 <code>item_labels</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/delphi_report.html">delphi_report</a></span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  file <span class="op">=</span> <span class="st">"round2_report.docx"</span>,</span>
@@ -556,6 +658,41 @@ template or from a file with two header rows, or can be supplied through
 <span>    E2 <span class="op">=</span> <span class="st">"AI agents autonomously manage recruitment pipelines"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>When the data contain comments, the report includes a section on
+them: the number of comments by item, the themes, the most frequent
+words and the comments on the items for the next round, each with the
+position of its author. Expert identifiers are never shown. All comments
+can be listed with <code>comments = "all"</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="feedback-for-the-next-round">Feedback for the next round<a class="anchor" aria-label="anchor" href="#feedback-for-the-next-round"></a>
+</h2>
+<p>Before a further round, the experts receive the controlled feedback
+of the current one. <code><a href="../reference/delphi_feedback.html">delphi_feedback()</a></code> prepares it for the
+items that require a further round, or for the items chosen with
+<code>items</code>: the median and the quartiles of the panel on every
+indicator, whether consensus was reached, and the comments of the
+experts, reported anonymously. With <code>file</code>, the feedback is
+written to an HTML or Word document addressed to the experts, which
+explains these statistics in plain words.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delphi_feedback.html">delphi_feedback</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">fb</span></span>
+<span><span class="co">#&gt;  item    indicator round  n median q1 q3 consensus             status</span></span>
+<span><span class="co">#&gt;    E7       impact     2 13      8  7  8      TRUE          consensus</span></span>
+<span><span class="co">#&gt;    E7 plausibility     2 13     83 77 88      TRUE unstable consensus</span></span>
+<span><span class="co">#&gt; 3 comment(s) included; see attr(, "comments").</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fb</span>, <span class="st">"comments"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   round item</span></span>
+<span><span class="co">#&gt; 1     2   E7</span></span>
+<span><span class="co">#&gt; 2     2   E7</span></span>
+<span><span class="co">#&gt; 3     2   E7</span></span>
+<span><span class="co">#&gt;                                                                                comment</span></span>
+<span><span class="co">#&gt; 1 Adoption will be slower than expected, because most firms lack the necessary skills.</span></span>
+<span><span class="co">#&gt; 2              The technology is already available, and its costs are falling quickly.</span></span>
+<span><span class="co">#&gt; 3                    New regulation in the European Union will accelerate this change.</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/delphi_feedback.html">delphi_feedback</a></span><span class="op">(</span><span class="va">x</span>, file <span class="op">=</span> <span class="st">"feedback_round3.docx"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

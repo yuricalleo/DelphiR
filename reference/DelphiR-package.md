@@ -1,7 +1,7 @@
 # DelphiR: Statistical Analysis of Delphi Studies
 
-DelphiR imports, validates and summarises the ratings collected in a
-Delphi study.
+DelphiR imports, validates and summarises the ratings and the comments
+collected in a Delphi study.
 
 ## The DelphiR data format
 
@@ -76,8 +76,20 @@ as not linked (`linked = FALSE`).
   or [`plot()`](https://rdrr.io/r/graphics/plot.default.html):
   publication-quality figures built with ggplot2.
 
+- [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md):
+  written comments of the experts, analysed with
+  [`delphi_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comments.md),
+  [`delphi_comment_counts()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comment_counts.md),
+  [`delphi_themes()`](https://yuricalleo.github.io/DelphiR/reference/delphi_themes.md),
+  [`delphi_words()`](https://yuricalleo.github.io/DelphiR/reference/delphi_words.md)
+  and
+  [`delphi_plot_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_comments.md).
+
 - [`delphi_report()`](https://yuricalleo.github.io/DelphiR/reference/delphi_report.md):
   a self-contained round report in HTML or Word format.
+
+- [`delphi_feedback()`](https://yuricalleo.github.io/DelphiR/reference/delphi_feedback.md):
+  controlled feedback for the experts before a further round.
 
 - [`delphi_wide()`](https://yuricalleo.github.io/DelphiR/reference/delphi_wide.md)
   and [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html):

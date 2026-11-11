@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DelphiR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,9 +29,33 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/yuricalleo/DelphiR/blob/v0.1.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/yuricalleo/DelphiR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="delphir-development-version">DelphiR (development version)<a class="anchor" aria-label="anchor" href="#delphir-development-version"></a></h2>
+<div class="section level3">
+<h3 id="expert-comments-development-version">Expert comments<a class="anchor" aria-label="anchor" href="#expert-comments-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/delphi_add_comments.html">delphi_add_comments()</a></code> attaches the written comments of the experts to a <code>delphi_data</code> object, from a table with one row per comment or from a survey export with one comment column per item. Comments can be coded with one or more themes.</li>
+<li>
+<code>read_delphi(comments_sheet = )</code> reads the comments from a sheet of the same Excel file, and <code><a href="../reference/delphi_template.html">delphi_template()</a></code> now includes a <code>comments</code> sheet.</li>
+<li>
+<code><a href="../reference/delphi_comments.html">delphi_comments()</a></code> lists the comments with the rating of their author and its position relative to the interquartile range of the panel.</li>
+<li>
+<code><a href="../reference/delphi_comment_counts.html">delphi_comment_counts()</a></code>, <code><a href="../reference/delphi_themes.html">delphi_themes()</a></code> and <code><a href="../reference/delphi_words.html">delphi_words()</a></code> count the comments by item, tabulate the themes and compute word frequencies, with common English and Italian words removed.</li>
+<li>
+<code><a href="../reference/delphi_plot_comments.html">delphi_plot_comments()</a></code> and <code>plot(type = "comments")</code> show the number of comments by item, split by the position of their authors.</li>
+<li>
+<code><a href="../reference/delphi_report.html">delphi_report()</a></code> includes a section on the comments when they are available; the new argument <code>comments</code> chooses which comments are listed.</li>
+<li>Example dataset <code>delphi_example_comments</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="feedback-for-the-next-round-development-version">Feedback for the next round<a class="anchor" aria-label="anchor" href="#feedback-for-the-next-round-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/delphi_feedback.html">delphi_feedback()</a></code> prepares the controlled feedback for the experts: median, quartiles and consensus of the items that require a further round, with the comments of the panel reported anonymously, as a table or as an HTML or Word document.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="delphir-010">DelphiR 0.1.0<a class="anchor" aria-label="anchor" href="#delphir-010"></a></h2>
 <p>First release.</p>

@@ -54,12 +54,31 @@
 - [`theme_delphi()`](https://yuricalleo.github.io/DelphiR/reference/theme_delphi.md)
   : ggplot2 theme for DelphiR figures
 
-## Reports
+## Expert comments
+
+- [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md)
+  : Add expert comments to a Delphi data object
+- [`delphi_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comments.md)
+  : Expert comments next to their ratings
+- [`delphi_comment_counts()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comment_counts.md)
+  : Number of comments by item
+- [`delphi_themes()`](https://yuricalleo.github.io/DelphiR/reference/delphi_themes.md)
+  : Themes of the comments
+- [`delphi_words()`](https://yuricalleo.github.io/DelphiR/reference/delphi_words.md)
+  : Word frequencies in the comments
+- [`delphi_plot_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_comments.md)
+  : Comments by item
+
+## Reports and feedback
 
 - [`delphi_report()`](https://yuricalleo.github.io/DelphiR/reference/delphi_report.md)
   : Generate a round report
+- [`delphi_feedback()`](https://yuricalleo.github.io/DelphiR/reference/delphi_feedback.md)
+  : Controlled feedback for the next round
 
 ## Data
 
 - [`delphi_example`](https://yuricalleo.github.io/DelphiR/reference/delphi_example.md)
   : Example Delphi study
+- [`delphi_example_comments`](https://yuricalleo.github.io/DelphiR/reference/delphi_example_comments.md)
+  : Comments of the example Delphi study

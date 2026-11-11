@@ -4,8 +4,9 @@ DelphiR is an R package for the statistical analysis of Delphi studies.
 It imports and validates the expert ratings, computes descriptive
 statistics by item, round and indicator, assesses consensus and
 stability, identifies the items to be submitted to a further round,
-draws publication-quality figures and generates a complete round report
-in HTML or Word format.
+analyses the written comments of the experts, draws publication-quality
+figures, and generates a complete round report in HTML or Word format
+and the controlled feedback for the next round.
 
 ## Installation
 
@@ -79,8 +80,14 @@ plot(x, type = "trend", indicator = "impact")
 plot(x, type = "consensus")
 plot(x, type = "map")
 
-# Round report in Word or HTML format
+# Expert comments, next to the rating of their author
+x <- delphi_add_comments(x, delphi_example_comments)
+delphi_comments(x)
+delphi_themes(x, by = "theme")
+
+# Round report and feedback for the experts, in Word or HTML format
 delphi_report(x, "round2_report.docx")
+delphi_feedback(x, "feedback_round3.docx")
 ```
 
 See
@@ -184,15 +191,34 @@ GPL (\>= 3)
 - [`theme_delphi()`](https://yuricalleo.github.io/DelphiR/reference/theme_delphi.md)
   : ggplot2 theme for DelphiR figures
 
-## Reports
+## Expert comments
+
+- [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md)
+  : Add expert comments to a Delphi data object
+- [`delphi_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comments.md)
+  : Expert comments next to their ratings
+- [`delphi_comment_counts()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comment_counts.md)
+  : Number of comments by item
+- [`delphi_themes()`](https://yuricalleo.github.io/DelphiR/reference/delphi_themes.md)
+  : Themes of the comments
+- [`delphi_words()`](https://yuricalleo.github.io/DelphiR/reference/delphi_words.md)
+  : Word frequencies in the comments
+- [`delphi_plot_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_comments.md)
+  : Comments by item
+
+## Reports and feedback
 
 - [`delphi_report()`](https://yuricalleo.github.io/DelphiR/reference/delphi_report.md)
   : Generate a round report
+- [`delphi_feedback()`](https://yuricalleo.github.io/DelphiR/reference/delphi_feedback.md)
+  : Controlled feedback for the next round
 
 ## Data
 
 - [`delphi_example`](https://yuricalleo.github.io/DelphiR/reference/delphi_example.md)
   : Example Delphi study
+- [`delphi_example_comments`](https://yuricalleo.github.io/DelphiR/reference/delphi_example_comments.md)
+  : Comments of the example Delphi study
 
 # Articles
 

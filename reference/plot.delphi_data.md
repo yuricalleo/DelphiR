@@ -13,13 +13,17 @@ Draws one of the DelphiR figures. This is a shortcut for the
   [`delphi_plot_consensus()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_consensus.md);
 
 - `"map"`:
-  [`delphi_plot_map()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_map.md).
+  [`delphi_plot_map()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_map.md);
+
+- `"comments"`:
+  [`delphi_plot_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_plot_comments.md),
+  for objects with comments.
 
 ## Usage
 
 ``` r
 # S3 method for class 'delphi_data'
-plot(x, type = c("distribution", "trend", "consensus", "map"), ...)
+plot(x, type = c("distribution", "trend", "consensus", "map", "comments"), ...)
 ```
 
 ## Arguments

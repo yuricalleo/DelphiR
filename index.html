@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DelphiR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@
 </div>
 <!-- badges: start -->
 
-<p>DelphiR is an R package for the statistical analysis of Delphi studies. It imports and validates the expert ratings, computes descriptive statistics by item, round and indicator, assesses consensus and stability, identifies the items to be submitted to a further round, draws publication-quality figures and generates a complete round report in HTML or Word format.</p>
+<p>DelphiR is an R package for the statistical analysis of Delphi studies. It imports and validates the expert ratings, computes descriptive statistics by item, round and indicator, assesses consensus and stability, identifies the items to be submitted to a further round, analyses the written comments of the experts, draws publication-quality figures, and generates a complete round report in HTML or Word format and the controlled feedback for the next round.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -141,8 +141,14 @@
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"consensus"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"map"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Round report in Word or HTML format</span></span>
-<span><span class="fu"><a href="reference/delphi_report.html">delphi_report</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"round2_report.docx"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Expert comments, next to the rating of their author</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/delphi_add_comments.html">delphi_add_comments</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">delphi_example_comments</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/delphi_comments.html">delphi_comments</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/delphi_themes.html">delphi_themes</a></span><span class="op">(</span><span class="va">x</span>, by <span class="op">=</span> <span class="st">"theme"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Round report and feedback for the experts, in Word or HTML format</span></span>
+<span><span class="fu"><a href="reference/delphi_report.html">delphi_report</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"round2_report.docx"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/delphi_feedback.html">delphi_feedback</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"feedback_round3.docx"</span><span class="op">)</span></span></code></pre></div>
 <p>See <code><a href="articles/DelphiR.html">vignette("DelphiR")</a></code> for an introduction to the complete workflow.</p>
 </div>
 <div class="section level2">

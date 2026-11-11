@@ -467,14 +467,134 @@ plot(x, type = "map")
 
 ![](DelphiR_files/figure-html/fig-map-1.png)
 
+## Expert comments
+
+Delphi questionnaires usually invite the experts to justify their
+ratings in a written comment. DelphiR stores the comments next to the
+ratings, so that each comment can be read together with the rating given
+by its author. The recommended layout has one row per comment, with the
+expert, the round, the item and the text of the comment; an empty item
+denotes a general comment on the questionnaire. This is the layout of
+the `comments` sheet of the template, which
+[`read_delphi()`](https://yuricalleo.github.io/DelphiR/reference/read_delphi.md)
+reads with `comments_sheet = "comments"`. Survey platforms that export
+one comment column per item are handled by
+`delphi_add_comments(layout = "wide")`.
+
+``` r
+
+head(delphi_example_comments, 3)
+#>   expert round item
+#> 1  EXP01     2   E7
+#> 2  EXP10     2   E7
+#> 3  EXP13     2   E7
+#>                                                                                comment
+#> 1 Adoption will be slower than expected, because most firms lack the necessary skills.
+#> 2              The technology is already available, and its costs are falling quickly.
+#> 3                    New regulation in the European Union will accelerate this change.
+#>                  theme
+#> 1 skills; time horizon
+#> 2                costs
+#> 3           regulation
+x <- delphi_add_comments(x, delphi_example_comments)
+x
+#> <delphi_data>
+#>   Experts:    15
+#>   Rounds:     2 (1, 2)
+#>   Items:      8 (E1, E2, E3, E4, E5, ..., E8)
+#>   Indicators: impact (from 1 to 10), plausibility (from 1 to 100)
+#>   Ratings:    445 (3 missing)
+#>   Comments:   11 (round 2); coded with themes
+#> Use summary() for descriptive statistics.
+```
+
+[`delphi_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comments.md)
+lists the comments with the rating of their author on every indicator,
+and its position relative to the ratings of the panel: below the first
+quartile, within the interquartile range or above the third quartile.
+Comments from experts outside the interquartile range present the
+arguments of the minority, which the Delphi method asks the rest of the
+panel to consider.
+
+``` r
+
+delphi_comments(x, items = "E7", general = FALSE)
+#> <delphi_comments> 3 comment(s)
+#> 
+#> Round 2, item E7
+#>   [EXP01]: impact below Q1, plausibility below Q1 (theme: skills; time horizon)
+#>     Adoption will be slower than expected, because most firms lack the
+#>     necessary skills.
+#>   [EXP10]: impact above Q3, plausibility above Q3 (theme: costs)
+#>     The technology is already available, and its costs are falling
+#>     quickly.
+#>   [EXP13]: impact within IQR, plausibility above Q3 (theme: regulation)
+#>     New regulation in the European Union will accelerate this change.
+```
+
+[`delphi_comment_counts()`](https://yuricalleo.github.io/DelphiR/reference/delphi_comment_counts.md)
+counts the comments received by each item, and
+`plot(x, type = "comments")` shows them split by the position of their
+authors.
+
+``` r
+
+delphi_comment_counts(x)
+#>  round item n_comments n_experts n_raters share_experts n_outside
+#>      2   E1          1         1       13          0.08         0
+#>      2   E2          2         2       13          0.15         2
+#>      2   E3          1         1       13          0.08         0
+#>      2   E4          0         0       13          0.00         0
+#>      2   E5          3         3       13          0.23         0
+#>      2   E6          0         0       13          0.00         0
+#>      2   E7          3         3       13          0.23         3
+#>      2   E8          0         0       13          0.00         0
+plot(x, type = "comments")
+```
+
+![](DelphiR_files/figure-html/comments-counts-1.png)
+
+The analysis of the content of the comments remains a task for the
+researchers. A common approach is to code each comment with one or more
+themes, written in a `theme` column and separated by semicolons;
+[`delphi_themes()`](https://yuricalleo.github.io/DelphiR/reference/delphi_themes.md)
+then tabulates the themes by item or across items.
+[`delphi_words()`](https://yuricalleo.github.io/DelphiR/reference/delphi_words.md)
+gives a first, descriptive overview of the words used in the comments,
+after removing common English and Italian words.
+
+``` r
+
+delphi_themes(x, by = "theme")
+#>   round              theme n_comments n_experts n_outside n_items  items
+#> 1     2              costs          2         2         1       2 E3, E7
+#> 2     2         regulation          2         2         2       2 E2, E7
+#> 3     2       time horizon          2         2         1       1     E7
+#> 4     2            wording          2         2         0       2 E1, E5
+#> 5     2   current practice          1         1         1       1     E2
+#> 6     2 sector differences          1         1         0       1     E5
+#> 7     2             skills          1         1         1       1     E7
+#> 8     2        uncertainty          1         1         0       1     E5
+delphi_words(x, top = 8)
+#>           word n n_comments
+#> 1      already 2          2
+#> 2        costs 2          2
+#> 3        firms 2          2
+#> 4        first 2          2
+#> 5   accelerate 1          1
+#> 6     adoption 1          1
+#> 7 arrangements 1          1
+#> 8    available 1          1
+```
+
 ## Round report
 
 [`delphi_report()`](https://yuricalleo.github.io/DelphiR/reference/delphi_report.md)
 assembles the analyses above into a self-contained report in HTML or
 Microsoft Word format. The report states the criteria adopted, with
-references, and closes with the items to be submitted to the next round.
-Full item statements are taken from the labels stored in the data, as
-read from the items sheet of the template or from a file with two header
+references, and lists the items to be submitted to the next round. Full
+item statements are taken from the labels stored in the data, as read
+from the items sheet of the template or from a file with two header
 rows, or can be supplied through `item_labels`.
 
 ``` r
@@ -489,6 +609,48 @@ delphi_report(
     E2 = "AI agents autonomously manage recruitment pipelines"
   )
 )
+```
+
+When the data contain comments, the report includes a section on them:
+the number of comments by item, the themes, the most frequent words and
+the comments on the items for the next round, each with the position of
+its author. Expert identifiers are never shown. All comments can be
+listed with `comments = "all"`.
+
+## Feedback for the next round
+
+Before a further round, the experts receive the controlled feedback of
+the current one.
+[`delphi_feedback()`](https://yuricalleo.github.io/DelphiR/reference/delphi_feedback.md)
+prepares it for the items that require a further round, or for the items
+chosen with `items`: the median and the quartiles of the panel on every
+indicator, whether consensus was reached, and the comments of the
+experts, reported anonymously. With `file`, the feedback is written to
+an HTML or Word document addressed to the experts, which explains these
+statistics in plain words.
+
+``` r
+
+fb <- delphi_feedback(x)
+fb
+#>  item    indicator round  n median q1 q3 consensus             status
+#>    E7       impact     2 13      8  7  8      TRUE          consensus
+#>    E7 plausibility     2 13     83 77 88      TRUE unstable consensus
+#> 3 comment(s) included; see attr(, "comments").
+attr(fb, "comments")
+#>   round item
+#> 1     2   E7
+#> 2     2   E7
+#> 3     2   E7
+#>                                                                                comment
+#> 1 Adoption will be slower than expected, because most firms lack the necessary skills.
+#> 2              The technology is already available, and its costs are falling quickly.
+#> 3                    New regulation in the European Union will accelerate this change.
+```
+
+``` r
+
+delphi_feedback(x, file = "feedback_round3.docx")
 ```
 
 ## References

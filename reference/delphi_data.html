@@ -13,7 +13,7 @@ be unique for each expert, round, indicator and item."><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">DelphiR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@ be unique for each expert, round, indicator and item."><meta property="og:image"
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Create a Delphi data object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/yuricalleo/DelphiR/blob/v0.1.0/R/delphi_data.R" class="external-link"><code>R/delphi_data.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/yuricalleo/DelphiR/blob/main/R/delphi_data.R" class="external-link"><code>R/delphi_data.R</code></a></small>
       <div class="d-none name"><code>delphi_data.Rd</code></div>
     </div>
 
@@ -139,7 +139,9 @@ them with <code>NA</code> and warns.</p></dd>
 <li><p><code>items</code>: item names, in their original order;</p></li>
 <li><p><code>scales</code>: named list with the scale of each indicator;</p></li>
 <li><p><code>labels</code>: full item statements, named by item (<code>NA</code> when not given);</p></li>
-<li><p><code>linked</code>: whether experts are linked across rounds.</p></li>
+<li><p><code>linked</code>: whether experts are linked across rounds;</p></li>
+<li><p><code>comments</code>: the comments of the experts, when added with
+<code><a href="delphi_add_comments.html">delphi_add_comments()</a></code> or read with <code><a href="read_delphi.html">read_delphi()</a></code>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

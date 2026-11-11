@@ -3,12 +3,15 @@
 Writes an empty file in the DelphiR format, ready to be filled in with
 the ratings of a Delphi study and imported with
 [`read_delphi()`](https://yuricalleo.github.io/DelphiR/reference/read_delphi.md).
-Excel templates contain three sheets:
+Excel templates contain four sheets:
 
 - `ratings`, with the column headers of the chosen layout;
 
 - `items`, listing the item codes, next to which the full statements can
   be written;
+
+- `comments`, for the written comments of the experts, one per row (see
+  [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md));
 
 - `instructions`, explaining how to fill in the template, with an
   example and the R code to import it.
@@ -78,7 +81,7 @@ if (requireNamespace("writexl", quietly = TRUE)) {
                           items = 8, indicators = c("impact", "probability"))
   path
 }
-#> [1] "/tmp/Rtmp4F3P37/delphi_template.xlsx"
+#> [1] "/tmp/Rtmpeb3Zvn/delphi_template.xlsx"
 # }
 # A CSV template in the long layout
 path <- delphi_template(file.path(tempdir(), "delphi_long.csv"), layout = "long")

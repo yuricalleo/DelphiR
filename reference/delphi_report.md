@@ -18,7 +18,13 @@ controlled feedback of the next round. The report contains:
 - the consensus heat map and, with two or more indicators, the
   two-indicator map;
 
-- the items to be submitted to a further round.
+- the items to be submitted to a further round;
+
+- when `x` contains comments (see
+  [`delphi_add_comments()`](https://yuricalleo.github.io/DelphiR/reference/delphi_add_comments.md)),
+  the number of comments by item, the themes coded by the researchers,
+  the most frequent words and the comments themselves, each with the
+  position of the author's rating relative to the interquartile range.
 
 ## Usage
 
@@ -37,6 +43,7 @@ delphi_report(
   scheibe = 0.15,
   type = 7,
   paired = NULL,
+  comments = c("next_round", "all", "none"),
   open = interactive(),
   quiet = TRUE
 )
@@ -89,6 +96,14 @@ delphi_report(
 
   Quantile algorithm; see
   [`delphi_describe()`](https://yuricalleo.github.io/DelphiR/reference/delphi_describe.md).
+
+- comments:
+
+  Which comments of the assessed round to list in full: those on the
+  items for the next round (`"next_round"`, default), all of them
+  (`"all"`) or none (`"none"`). Counts, themes and word frequencies are
+  reported whenever `x` contains comments. Expert identifiers are never
+  shown.
 
 - open:
 
