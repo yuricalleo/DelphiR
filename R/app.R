@@ -681,7 +681,17 @@ app_server <- function(initial = NULL) {
       if (is.null(args)) return()
       res <- tryCatch(
         with_warnings(do.call(read_delphi, c(list(input$file$datapath), args))),
-        error = fail
+        error = function(e) {
+          msg <- conditionMessage(e)
+          if (grepl("outside the scale", msg, fixed = TRUE)) {
+            msg <- paste0(
+              sub("Check the data or the `scale` argument.", "", msg, fixed = TRUE),
+              "Choose the rating scale of the questionnaire under 'Rating scale', ",
+              "for example from 0 to 10, or correct the ratings in the file."
+            )
+          }
+          fail(simpleError(msg))
+        }
       )
       if (is.null(res)) return()
       notify_warnings(res$warnings)
