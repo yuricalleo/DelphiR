@@ -78,7 +78,7 @@ if (requireNamespace("writexl", quietly = TRUE)) {
                           items = 8, indicators = c("impact", "probability"))
   path
 }
-#> [1] "/tmp/RtmpEihrcx/delphi_template.xlsx"
+#> [1] "/tmp/Rtmp4F3P37/delphi_template.xlsx"
 # }
 # A CSV template in the long layout
 path <- delphi_template(file.path(tempdir(), "delphi_long.csv"), layout = "long")

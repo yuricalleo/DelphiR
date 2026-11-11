@@ -1,7 +1,5 @@
 # Changelog
 
-## DelphiR (development version)
-
 ## DelphiR 0.1.0
 
 First release.
