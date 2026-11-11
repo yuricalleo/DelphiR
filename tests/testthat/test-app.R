@@ -58,6 +58,14 @@ test_that("files with two header rows are described for the column choices", {
   )
   expect_equal(two_header_id_cols(raw), c("ID", "V2"))
   expect_equal(two_header_indicators(raw), c("IMPACT", "PROB"))
+  expect_equal(guess_scale(c(2, 9)), "From 1 to 10")
+  expect_equal(guess_scale(c(1, 4)), "From 1 to 5")
+  expect_equal(guess_scale(c(0, 7)), "From 0 to 10")
+  expect_equal(guess_scale(c(3, 95)), "From 1 to 100")
+  expect_equal(guess_scale(c(1, 500)), "other")
+  expect_equal(observed_range(data.frame(a = c("7,5", "2"), b = c(NA, "x"))), c(2, 7.5))
+  expect_equal(scale_arg(list(a = c(1, 5), b = c(1, 5))), c(1, 5))
+  expect_equal(scale_arg(list(a = c(1, 5), b = c(1, 9))), list(a = c(1, 5), b = c(1, 9)))
   p <- preview_table(data.frame(t = strrep("a", 50)), width = 10)
   expect_equal(p$t, "aaaaaaa...")
 })
@@ -106,7 +114,7 @@ test_that("the application imports data and reproduces the analysis", {
                         datapath = path, stringsAsFactors = FALSE),
       layout = "wide", expert_col = "expert", round_col = "", round = 1,
       indicator_col = "", indicator = "impact",
-      items = paste0("E", 1:8), scale_min = 1, scale_max = 10, linked = TRUE
+      items = paste0("E", 1:8), scale_preset_1 = "From 1 to 10", linked = TRUE
     )
     session$setInputs(add_part = 1)
     x <- study()
@@ -116,5 +124,36 @@ test_that("the application imports data and reproduces the analysis", {
     expect_true(any(grepl("read_delphi(\"delphi_round1.csv\"", code, fixed = TRUE)))
     expect_true(any(grepl("indicator = \"impact\"", code, fixed = TRUE)))
     expect_false(any(grepl("delphi_stability", code)))
+    expect_false(any(grepl("scale =", code)))
+    session$setInputs(clear = 1)
+    session$setInputs(scale_preset_1 = "other", scale_min_1 = 0, scale_max_1 = 20, add_part = 2)
+    expect_equal(study()$scales$impact, c(0, 20))
+    expect_true(any(grepl("scale = c(0, 20)", code_txt(), fixed = TRUE)))
+  })
+
+  # Two indicators in the same table, with different scales
+  ratings <- data.frame(expert = rep(c("A", "B", "C"), 2),
+                        indicator = rep(c("impact", "plausibility"), each = 3),
+                        E1 = c(7, 8, 6, 70, 85, 90), E2 = c(3, 5, 4, 20, 35, 40))
+  csv <- withr::local_tempfile(fileext = ".csv")
+  utils::write.csv(ratings, csv, row.names = FALSE)
+  shiny::testServer(app_server(), {
+    do.call(session$setInputs, criteria)
+    session$setInputs(
+      source = "file",
+      file = data.frame(name = "two.csv", size = 1, type = "text/csv", datapath = csv,
+                        stringsAsFactors = FALSE),
+      layout = "wide", expert_col = "expert", round_col = "", round = 1,
+      indicator_col = "indicator", indicator = "score", items = c("E1", "E2"),
+      linked = TRUE
+    )
+    groups <- indicator_groups()
+    expect_equal(vapply(groups, `[[`, character(1), "label"), c("impact", "plausibility"))
+    expect_equal(groups[[2]]$range, c(20, 90))
+    session$setInputs(scale_preset_1 = "From 1 to 10", scale_preset_2 = "From 1 to 100",
+                      add_part = 1)
+    expect_equal(study()$scales, list(impact = c(1, 10), plausibility = c(1, 100)))
+    expect_true(any(grepl("scale = list(impact = c(1, 10), plausibility = c(1, 100))",
+                          code_txt(), fixed = TRUE)))
   })
 })

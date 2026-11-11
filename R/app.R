@@ -85,7 +85,7 @@ app_ui <- function() {
     width = 270,
     shiny::numericInput("threshold", "Consensus: IQR at most (% of the scale)",
                         value = 20, min = 1, max = 100, step = 1),
-    shiny::selectInput("relative_to", "Width of the scale",
+    shiny::selectInput("relative_to", "Scale size for the consensus rule",
                        c("Number of points (max - min + 1)" = "points",
                          "Range (max - min)" = "range")),
     shiny::selectInput("method", "Stability criterion",
@@ -98,7 +98,8 @@ app_ui <- function() {
                         min = 1, max = 100, step = 1),
     shiny::selectInput("type", "Quantile algorithm",
                        c("Type 7 (R default)" = 7, "Type 6 (SPSS, Minitab)" = 6)),
-    shiny::helpText("The criteria apply to every table, figure and report.")
+    shiny::helpText("The criteria apply to every table, figure and report."),
+    shiny::uiOutput("thresholds")
   )
 
   bslib::page_navbar(
@@ -385,6 +386,22 @@ app_server <- function(initial = NULL) {
       )
     })
 
+    output$thresholds <- shiny::renderUI({
+      x <- study()
+      if (is.null(x)) return(NULL)
+      cr <- crit()
+      rows <- vapply(names(x$scales), function(i) {
+        s <- x$scales[[i]]
+        cut <- round(cr$threshold * scale_width(s, cr$relative_to), 2)
+        paste0(i, " (", scale_label(s), "): IQR at most ", format(cut))
+      }, character(1))
+      shiny::div(
+        class = "small",
+        shiny::strong("Consensus in this study"),
+        shiny::tags$ul(class = "ps-3", lapply(rows, shiny::tags$li))
+      )
+    })
+
     # Ratings file ----------------------------------------------------------
     file_ext <- shiny::reactive({
       shiny::req(input$file)
@@ -481,11 +498,7 @@ app_server <- function(initial = NULL) {
         ui <- c(ui, list(shiny::uiOutput("items_ui")))
       }
       ui <- c(ui, list(
-        bslib::layout_columns(
-          col_widths = c(6, 6),
-          shiny::numericInput("scale_min", "Lowest rating", 1),
-          shiny::numericInput("scale_max", "Highest rating", 10)
-        ),
+        shiny::uiOutput("scales_ui"),
         shiny::checkboxInput(
           "linked", "The same identifier denotes the same expert in every round", TRUE
         )
@@ -506,6 +519,100 @@ app_server <- function(initial = NULL) {
       cand <- setdiff(cols, used[nzchar(used)])
       shiny::selectizeInput("items", "Item columns", choices = cand, selected = cand,
                             multiple = TRUE, options = list(plugins = list("remove_button")))
+    })
+
+    # Indicators found in the file, with the range of their ratings, so that
+    # a rating scale can be chosen for each of them
+    indicator_groups <- shiny::reactive({
+      df <- raw()
+      lay <- input$layout
+      if (lay == "wide2") {
+        clean <- function(v) {
+          v <- trimws(gsub("[[:space:]]+", " ", as.character(v)))
+          v[is.na(v)] <- ""
+          v
+        }
+        first <- clean(unlist(df[1L, ], use.names = FALSE))
+        inds <- two_header_indicators(df)
+        body <- df[-(1:2), , drop = FALSE]
+        return(lapply(inds, function(k) {
+          list(label = k, range = observed_range(body[, first == k, drop = FALSE]))
+        }))
+      }
+      value_cols <- if (lay == "long") {
+        shiny::req(input$value_col)
+      } else {
+        used <- c(input$expert_col, input$round_col, input$indicator_col)
+        cand <- setdiff(names(df), used[nzchar(used)])
+        if (length(input$items) > 0L) intersect(input$items, cand) else cand
+      }
+      value_cols <- intersect(value_cols, names(df))
+      ind_col <- input$indicator_col
+      if (!is.null(ind_col) && nzchar(ind_col) && ind_col %in% names(df)) {
+        lev <- trimws(as.character(df[[ind_col]]))
+        inds <- unique(lev[!is.na(lev) & nzchar(lev)])
+        return(lapply(inds, function(k) {
+          list(label = k, range = observed_range(df[lev %in% k, value_cols, drop = FALSE]))
+        }))
+      }
+      list(list(label = NA_character_, range = observed_range(df[, value_cols, drop = FALSE])))
+    })
+
+    output$scales_ui <- shiny::renderUI({
+      groups <- indicator_groups()
+      choices <- c(names(scale_presets), "Other" = "other")
+      shiny::tagList(lapply(seq_along(groups), function(k) {
+        g <- groups[[k]]
+        r <- g$range
+        lab <- if (is.na(g$label)) "Rating scale" else paste0("Rating scale: ", g$label)
+        hint <- if (is.null(r)) NULL else {
+          paste0("Choose the scale of the questionnaire. The ratings in the file range from ",
+                 format(r[1L]), " to ", format(r[2L]), ".")
+        }
+        guess <- guess_scale(r)
+        shiny::div(
+          class = "mb-3",
+          shiny::selectInput(paste0("scale_preset_", k), lab, choices, selected = guess),
+          shiny::conditionalPanel(
+            sprintf("input.scale_preset_%d == 'other'", k),
+            bslib::layout_columns(
+              col_widths = c(6, 6),
+              shiny::numericInput(paste0("scale_min_", k), "Lowest rating",
+                                  if (is.null(r)) 1 else floor(r[1L])),
+              shiny::numericInput(paste0("scale_max_", k), "Highest rating",
+                                  if (is.null(r)) 10 else ceiling(r[2L]))
+            )
+          ),
+          if (!is.null(hint)) shiny::helpText(hint)
+        )
+      }))
+    })
+
+    # Chosen scales, named by the indicator names used in the data
+    chosen_scales <- shiny::reactive({
+      groups <- indicator_groups()
+      sc <- lapply(seq_along(groups), function(k) {
+        preset <- input[[paste0("scale_preset_", k)]]
+        if (is.null(preset)) {
+          return(scale_presets[[guess_scale(groups[[k]]$range)]] %||% c(1, 10))
+        }
+        if (preset == "other") {
+          c(input[[paste0("scale_min_", k)]], input[[paste0("scale_max_", k)]])
+        } else {
+          scale_presets[[preset]]
+        }
+      })
+      if (length(sc) == 1L) {
+        return(sc[[1L]])
+      }
+      nms <- vapply(groups, `[[`, character(1), "label")
+      if (input$layout == "wide2") {
+        nms <- vapply(seq_along(nms), function(k) {
+          v <- input[[paste0("ind_name_", k)]]
+          if (is.null(v) || !nzchar(trimws(v))) nms[k] else trimws(v)
+        }, character(1))
+      }
+      stats::setNames(sc, nms)
     })
 
     import_spec <- shiny::reactive({
@@ -530,7 +637,7 @@ app_server <- function(initial = NULL) {
         indicator_col = input$indicator_col, indicator = trimws(input$indicator %||% ""),
         items = input$items, all_items = all_items,
         item_col = input$item_col, value_col = input$value_col,
-        scale = c(input$scale_min, input$scale_max), linked = input$linked,
+        scale = chosen_scales(), linked = input$linked,
         items_sheet = input$items_sheet, indicator_names = ren
       )
     })
@@ -561,8 +668,13 @@ app_server <- function(initial = NULL) {
       }
       shiny::req(input$file)
       spec <- import_spec()
-      if (any(is.na(spec$scale))) {
-        shiny::showNotification("Give the lowest and highest ratings of the scale.", type = "error")
+      bad <- vapply(as.list(if (is.list(spec$scale)) spec$scale else list(spec$scale)),
+                    function(v) length(v) != 2L || anyNA(v) || v[1L] >= v[2L], logical(1))
+      if (any(bad)) {
+        shiny::showNotification(
+          "Give the lowest and the highest rating of each scale, with the lowest first.",
+          type = "error"
+        )
         return()
       }
       args <- tryCatch(import_args(spec, excel = is_excel()), error = fail)

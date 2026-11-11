@@ -11,6 +11,10 @@
   the round report and the feedback for the experts. The application also
   writes the R code that reproduces the analysis. It requires the 'shiny',
   'bslib' and 'DT' packages.
+* In the application, the rating scale is chosen for each indicator among
+  the most common ones (from 1 to 5, 7, 9, 10 or 100, or from 0 to 10 or 100)
+  or entered freely, and the sidebar shows the resulting consensus threshold
+  of each indicator.
 
 ## Expert comments
 

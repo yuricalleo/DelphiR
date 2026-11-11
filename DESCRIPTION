@@ -1,7 +1,7 @@
 Package: DelphiR
 Type: Package
 Title: Statistical Analysis of Delphi Studies
-Version: 0.1.0.9001
+Version: 0.1.0.9002
 Authors@R:
     person("Yuri", "Calleo", , "yuri.calleo@unimercatorum.it", role = c("aut", "cre", "cph"))
 Description: Tools for the statistical analysis of Delphi studies. Expert

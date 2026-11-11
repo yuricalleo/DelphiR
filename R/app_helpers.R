@@ -100,8 +100,9 @@ import_args <- function(spec, excel = FALSE) {
     ren <- ren[!is.na(ren) & nzchar(ren) & ren != names(ren)]
     if (length(ren) > 0L) args$indicator_names <- ren
   }
-  if (!isTRUE(all.equal(as.numeric(spec$scale), c(1, 10)))) {
-    args$scale <- as.numeric(spec$scale)
+  scale <- scale_arg(spec$scale)
+  if (is.list(scale) || !isTRUE(all.equal(scale, c(1, 10)))) {
+    args$scale <- scale
   }
   if (!isTRUE(spec$linked)) {
     args$linked <- FALSE
@@ -182,4 +183,49 @@ example_data <- function(name) {
   env <- new.env()
   utils::data(list = name, package = "DelphiR", envir = env)
   env[[name]]
+}
+
+# Rating scales offered in the application
+scale_presets <- list(
+  "From 1 to 5" = c(1, 5), "From 1 to 7" = c(1, 7), "From 1 to 9" = c(1, 9),
+  "From 1 to 10" = c(1, 10), "From 0 to 10" = c(0, 10),
+  "From 1 to 100" = c(1, 100), "From 0 to 100" = c(0, 100)
+)
+
+# Range of the numeric values of a table, accepting decimal commas
+observed_range <- function(v) {
+  v <- as.character(unlist(v, use.names = FALSE))
+  v <- suppressWarnings(as.numeric(gsub(",", ".", v, fixed = TRUE)))
+  v <- v[is.finite(v)]
+  if (length(v) == 0L) NULL else range(v)
+}
+
+# A default scale for the observed ratings. Ratings rarely cover the whole
+# scale, so the most common scales are preferred: from 1 to 10 unless the
+# ratings require another one. The user confirms or changes the choice.
+guess_scale <- function(r) {
+  if (is.null(r)) {
+    return("From 1 to 10")
+  }
+  order <- c("From 1 to 5", "From 1 to 10", "From 0 to 10", "From 1 to 100", "From 0 to 100")
+  if (r[1L] >= 1 && r[2L] <= 5) {
+    return("From 1 to 5")
+  }
+  for (nm in order[-1L]) {
+    s <- scale_presets[[nm]]
+    if (s[1L] <= r[1L] && s[2L] >= r[2L]) return(nm)
+  }
+  "other"
+}
+
+# A single scale when all indicators share it, otherwise a named list
+scale_arg <- function(scales) {
+  if (!is.list(scales)) {
+    return(as.numeric(scales))
+  }
+  if (length(scales) == 1L ||
+      all(vapply(scales, function(s) isTRUE(all.equal(s, scales[[1L]])), logical(1)))) {
+    return(as.numeric(scales[[1L]]))
+  }
+  lapply(scales, as.numeric)
 }
