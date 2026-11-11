@@ -49,8 +49,8 @@ First release.
 - [`delphi_stability()`](https://yuricalleo.github.io/DelphiR/reference/delphi_stability.md)
   assesses stability between consecutive rounds with the Wilcoxon test
   (the default: signed-rank for linked experts, rank-sum otherwise),
-  with the 15% change criterion of Scheibe, Skutsch and Schofer (1975),
-  or with both.
+  with a net-change criterion based on Scheibe, Skutsch and Schofer
+  (1975), or with both.
 - [`delphi_status()`](https://yuricalleo.github.io/DelphiR/reference/delphi_status.md)
   combines consensus and stability into four categories (consensus,
   unstable consensus, stable dissent and open) and identifies the items

@@ -310,12 +310,15 @@ the experts are linked across rounds,
 compares consecutive rounds on the experts who rated the item in both,
 so that attrition is not mistaken for a change of opinion. Two criteria
 are available: the Wilcoxon test (the default), under which an item is
-stable when the test is not significant, and the criterion of Scheibe,
-Skutsch and Schofer (1975), under which an item is stable when the net
-change between the two rating distributions does not exceed 15% of the
-experts. Setting `method = "both"` requires both conditions. With linked
-experts the Wilcoxon test is the paired signed-rank test; with unlinked
-experts the rounds are compared as independent samples with the rank-sum
+stable when the test is not significant, and a criterion based on
+Scheibe, Skutsch and Schofer (1975), under which an item is stable when
+the net change between the two rating distributions does not exceed 15%.
+The net change is half the sum of the absolute differences between the
+shares of experts in each class of the scale, that is, the share of
+experts who would have to move to turn one distribution into the other.
+Setting `method = "both"` requires both conditions. With linked experts
+the Wilcoxon test is the paired signed-rank test; with unlinked experts
+the rounds are compared as independent samples with the rank-sum
 (Mann-Whitney) test, and differences between rounds then reflect both
 changes of opinion and changes in the composition of the panel.
 

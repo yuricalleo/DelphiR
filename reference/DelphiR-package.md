@@ -62,7 +62,8 @@ as not linked (`linked = FALSE`).
   IQR consensus rule (IQR at most 20% of the scale by default).
 
 - [`delphi_stability()`](https://yuricalleo.github.io/DelphiR/reference/delphi_stability.md):
-  stability between rounds (Wilcoxon test or Scheibe 15% criterion).
+  stability between rounds (Wilcoxon test or net change between
+  distributions, based on Scheibe et al., 1975).
 
 - [`delphi_status()`](https://yuricalleo.github.io/DelphiR/reference/delphi_status.md):
   consensus and stability together, and the items for the next round.

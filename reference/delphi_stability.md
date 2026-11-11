@@ -10,9 +10,10 @@ stability criteria are available:
   on the two independent samples. The item is stable when the test is
   not significant (`p_value >= alpha`).
 
-- Scheibe: the 15% change criterion of Scheibe, Skutsch and Schofer
-  (1975). The item is stable when the net change between the two rating
-  distributions is at most `scheibe` (15% by default).
+- Net change between distributions: a criterion based on Scheibe,
+  Skutsch and Schofer (1975). The item is stable when the net change
+  between the two rating distributions, computed as described in
+  Details, is at most `scheibe` (15% by default).
 
 ## Usage
 
@@ -51,7 +52,7 @@ delphi_stability(
 - scheibe:
 
   Largest share of net change that still counts as stable under the
-  Scheibe criterion. Default `0.15`.
+  net-change criterion. Default `0.15`.
 
 - rounds:
 
@@ -66,9 +67,10 @@ delphi_stability(
 - bins:
 
   Number of classes used to build the rating distributions for the
-  Scheibe criterion on long scales. Scales with up to `bins` points use
-  one class per scale point; longer scales are split into `bins` equal
-  classes (for example 1 to 10, 11 to 20, ..., 91 to 100). Default `10`.
+  net-change criterion on long scales. Scales with up to `bins` points
+  use one class per scale point; longer scales are split into `bins`
+  equal classes (for example 1 to 10, 11 to 20, ..., 91 to 100). Default
+  `10`.
 
 - type:
 
@@ -107,25 +109,27 @@ Medians and IQRs are always computed on all experts who answered each
 round (`n_from`, `n_to`), as in
 [`delphi_describe()`](https://yuricalleo.github.io/DelphiR/reference/delphi_describe.md).
 
+The ratings of each round are grouped into classes (one class per scale
+point, or `bins` classes on long scales), and the net change is \$\$C =
+\frac{1}{2} \sum_k \left\| p_k^{(t)} - p_k^{(t-1)} \right\|,\$\$ where
+\\p_k^{(t)}\\ is the share of experts in class \\k\\ in round \\t\\.
+\\C\\ is the share of experts who would have to move to another class to
+turn one distribution into the other.
+
 In the paired comparison, the test, the share of experts who changed
-their rating (`changed`) and the Scheibe change are computed on the
-experts who answered the item in both rounds (`n_paired`), so that
-drop-outs are not mistaken for changes of opinion. The Scheibe change is
-half the sum of the absolute differences between the frequencies of the
-two rating distributions, divided by the number of paired experts: the
-share of experts who would have to move to turn one distribution into
-the other.
+their rating (`changed`) and the net change are computed on the experts
+who answered the item in both rounds (`n_paired`), so that drop-outs are
+not mistaken for changes of opinion.
 
 In the unpaired comparison, used when the same expert cannot be
 identified in both rounds, the test is the Wilcoxon rank-sum test and
-the Scheibe change is half the sum of the absolute differences between
-the relative frequencies of the two distributions; `n_paired` and
-`changed` are `NA`. Since the two samples may include different experts,
-a difference between rounds reflects both changes of opinion and changes
-in the composition of the panel.
+the net change is computed on all the experts who answered each round;
+`n_paired` and `changed` are `NA`. Since the two samples may include
+different experts, a difference between rounds reflects both changes of
+opinion and changes in the composition of the panel.
 
 When the two rounds contain exactly the same ratings, the item is stable
-under both criteria (`p_value = 1`, Scheibe change `0`).
+under both criteria (`p_value = 1`, net change `0`).
 
 ## References
 
@@ -188,9 +192,9 @@ delphi_stability(x)
 #>   plausibility, round 1 to 2: 7 of 8
 #> All columns: as.data.frame(x).
 
-# Scheibe criterion only, on the impact ratings
+# Net-change criterion only, on the impact ratings
 delphi_stability(x, method = "scheibe", indicator = "impact")
-#> Stability criterion: Scheibe et al. (1975), stable if change <= 15%
+#> Stability criterion: net change between distributions, stable if <= 15%
 #> Paired comparison on the experts who answered both rounds.
 #> 
 #>  indicator item round_from round_to n_paired median_from median_to iqr_from
