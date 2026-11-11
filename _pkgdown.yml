@@ -1,0 +1,39 @@
+url: https://yuricalleo.github.io/DelphiR/
+template:
+  bootstrap: 5
+reference:
+  - title: Data import
+    contents:
+      - delphi_template
+      - read_delphi
+      - delphi_data
+      - delphi_data_long
+      - delphi_bind
+      - is_delphi_data
+  - title: Description
+    contents:
+      - delphi_describe
+      - delphi_panel
+      - summary.delphi_data
+      - print.delphi_data
+      - delphi_wide
+      - as.data.frame.delphi_data
+  - title: Consensus and stability
+    contents:
+      - delphi_consensus
+      - delphi_stability
+      - delphi_status
+  - title: Figures
+    contents:
+      - plot.delphi_data
+      - delphi_plot_distribution
+      - delphi_plot_trend
+      - delphi_plot_consensus
+      - delphi_plot_map
+      - theme_delphi
+  - title: Reports
+    contents:
+      - delphi_report
+  - title: Data
+    contents:
+      - delphi_example

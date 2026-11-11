@@ -1,0 +1,305 @@
+---
+title: "Introduction to DelphiR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to DelphiR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7.5,
+  fig.height = 5,
+  dpi = 96,
+  out.width = "100%"
+)
+```
+
+The Delphi method elicits the judgements of a panel of experts through
+successive rounds of anonymous rating, interleaved with controlled feedback
+on the distribution of the group's responses. The analysis of each round
+typically addresses four questions: how the ratings are distributed, whether
+the panel has reached consensus, whether the ratings have stabilised between
+rounds, and which items should be submitted to a further round. DelphiR
+provides a consistent workflow for these steps, from the import of the raw
+ratings to a complete round report.
+
+```{r setup}
+library(DelphiR)
+```
+
+# Data format
+
+DelphiR is built around a wide layout: each row contains the ratings given
+by one expert, each column refers to one item, and each cell holds a numeric
+rating. Empty cells denote missing ratings (item non-response).
+
+| expert | round | indicator | E1 | E2 | E3 |
+|--------|-------|-----------|----|----|----|
+| EXP01  | 1     | impact    | 9  | 7  | 5  |
+| EXP02  | 1     | impact    | 6  | 5  | 7  |
+| EXP03  | 1     | impact    | 8  |    | 6  |
+
+Three columns describe the context of each row:
+
+* the expert identifier, which is required to follow the same expert across
+  rounds;
+* the round number (1, 2, ...);
+* the indicator, such as impact or plausibility, when the same items are
+  rated on more than one dimension.
+
+The round and indicator columns are optional. When they are absent, the
+table is treated as a single round and a single indicator, specified through
+the `round` and `indicator` arguments. Each indicator has its own rating
+scale, against which the ratings are validated.
+
+`delphi_template()` creates an empty Excel file in this format, with a sheet
+for the ratings, a sheet for the full statements of the items and a sheet of
+instructions that includes the code needed to import the completed file.
+
+```{r template, eval = FALSE}
+delphi_template("my_delphi.xlsx", items = 12,
+                indicators = c("impact", "probability"))
+```
+
+# Importing the ratings
+
+Ratings can be imported from a data frame with `delphi_data()` or directly
+from a CSV, TSV or Excel file with `read_delphi()`. The separator and the
+decimal mark of text files are detected automatically, including the
+semicolon-separated files with decimal commas produced by many European
+spreadsheet applications.
+
+```{r import-file}
+path <- system.file("extdata", "delphi_round1.csv", package = "DelphiR")
+r1 <- read_delphi(path, expert_col = "expert",
+                  indicator = "impact", scale = c(1, 10))
+r1
+```
+
+Tables referring to different rounds or indicators can be imported
+separately and combined with `delphi_bind()`, for example
+`delphi_bind(r1, r2)`. Alternatively, rounds and indicators can be stacked
+in a single table, as in the example dataset shipped with the package, in
+which fifteen experts rated eight items on impact (from 1 to 10) and
+plausibility (from 1 to 100) over two rounds.
+
+```{r import-df}
+head(delphi_example)
+
+x <- delphi_data(
+  delphi_example,
+  expert_col = "expert", round_col = "round", indicator_col = "indicator",
+  scale = list(impact = c(1, 10), plausibility = c(1, 100))
+)
+x
+```
+
+Ratings outside the declared scale, non-numeric entries and duplicated
+experts are reported with an informative error, so that coding mistakes are
+detected before any analysis is carried out. Rows without an expert
+identifier, such as summary rows with medians or quartiles added below the
+data, are ignored with a warning.
+
+## Long format
+
+Ratings can also be supplied in long format, with one row per rating and
+columns for the expert, the item and the value, and optionally the round and
+the indicator. This is the format produced by most statistical software when
+data are reshaped. Long tables are imported with `delphi_data_long()` or with
+`read_delphi(layout = "long")`, and any `delphi_data` object can be returned
+to this format with `as.data.frame()`.
+
+```{r long}
+long <- as.data.frame(x)
+head(long)
+x_long <- delphi_data_long(
+  long, round_col = "round", indicator_col = "indicator",
+  scale = list(impact = c(1, 10), plausibility = c(1, 100))
+)
+identical(x_long$data, x$data)
+```
+
+## Survey exports with two header rows
+
+When each item is rated on several indicators, survey platforms and
+spreadsheets often place the indicators side by side, with a first header
+row naming the indicator of each column and a second row giving the item
+statement above each group of columns:
+
+|    |      | Impact            | Probability | Impact            | Probability |
+|----|------|-------------------|-------------|-------------------|-------------|
+| ID | Age  | 1. First statement |            | 2. Second statement |           |
+| 11 | 30   | 8                 | 6           | 5                 | 4           |
+
+Such files are read with `header_rows = 2`. Items are coded `E1`, `E2`, ...
+in order of appearance, their statements are stored as labels and used in
+reports, and columns without an indicator (such as `Age`) are ignored.
+Indicator names can be translated or shortened with `indicator_names`.
+
+```{r two-header, eval = FALSE}
+r1 <- read_delphi(
+  "study.xlsx", sheet = "ROUND_1", header_rows = 2,
+  expert_col = "ID", round = 1, scale = c(1, 10),
+  indicator_names = c(IMPATTO = "impact", PROBAB = "probability")
+)
+```
+
+## Linked and unlinked panels
+
+Comparisons between rounds at the level of the individual expert require
+that the same expert has the same identifier in every round. This is not
+the case when each round is collected with a separate questionnaire and the
+identifiers are response numbers: the same number then denotes different
+people. Declaring `linked = FALSE` prevents spurious pairings: retention is
+not computed, and stability is assessed by comparing the rounds as
+independent samples (see below). Tables imported without an expert
+identifier are treated as unlinked.
+
+# Descriptive statistics and panel participation
+
+`summary()` gives an overview of the panel and of the median and
+interquartile range (IQR) of each item by round. Items that reach consensus
+are marked with an asterisk.
+
+```{r summary}
+summary(x)
+```
+
+`delphi_describe()` returns the full set of descriptive statistics, and
+`delphi_panel()` the number of respondents and the retention rate in each
+round.
+
+```{r describe}
+head(delphi_describe(x, indicator = "impact"))
+delphi_panel(x)
+```
+
+Quartiles are computed with R's default algorithm (`type = 7`). Setting
+`type = 6` reproduces the quartiles reported by SPSS and Minitab, which
+facilitates comparison with studies analysed with that software.
+
+# Consensus
+
+Following the review of consensus measures by von der Gracht (2012), an
+item is considered to have reached consensus when its IQR does not exceed
+20% of the rating scale. By default, the scale is measured by its number of
+points, so that the threshold corresponds to an IQR of at most 1 on a
+five-point scale and at most 2 on a ten-point scale. The threshold can be
+changed with `threshold`, and `relative_to = "range"` measures the scale as
+its maximum minus its minimum, which is preferable for continuous scales.
+
+```{r consensus}
+cons <- delphi_consensus(x, round = 2)
+cons
+```
+
+# Stability
+
+Consensus describes the agreement of the panel within a round; stability
+describes whether the ratings have ceased to change between rounds.
+When the experts are linked across rounds, `delphi_stability()` compares
+consecutive rounds on the experts who rated the item in both, so that
+attrition is not mistaken for a change of opinion. Two criteria are
+available: the Wilcoxon test (the default), under which an item is stable
+when the test is not significant, and the criterion of Scheibe, Skutsch and
+Schofer (1975), under which an item is stable when the net change between
+the two rating distributions does not exceed 15% of the experts. Setting
+`method = "both"` requires both conditions. With linked experts the
+Wilcoxon test is the paired signed-rank test; with unlinked experts the
+rounds are compared as independent samples with the rank-sum
+(Mann-Whitney) test, and differences between rounds then reflect both
+changes of opinion and changes in the composition of the panel.
+
+```{r stability}
+delphi_stability(x, indicator = "impact")
+```
+
+# Item status and the next round
+
+`delphi_status()` combines consensus and stability into four categories:
+*consensus* (consensus reached and stable), *unstable consensus* (consensus
+reached, but ratings still changing), *stable dissent* (no consensus, but
+ratings no longer changing) and *open* (neither). Items with an unstable
+consensus or an open status are flagged for a further round. A stable
+dissent is a substantive result: it indicates a persistent disagreement
+that a further round is unlikely to resolve.
+
+```{r status}
+st <- delphi_status(x)
+st
+subset(st, next_round)
+```
+
+# Figures
+
+DelphiR draws four figures with ggplot2, all available through `plot()`.
+They are returned as ggplot objects and can therefore be modified with the
+usual ggplot2 syntax or saved with `ggplot2::ggsave()`.
+
+The distribution of the ratings in each round shows how the panel converges
+or remains divided.
+
+```{r fig-distribution, fig.height = 5.5}
+plot(x, type = "distribution", indicator = "impact")
+```
+
+The median and IQR across rounds summarise the same information; filled
+points denote consensus.
+
+```{r fig-trend, fig.height = 5.5}
+plot(x, type = "trend", indicator = "impact")
+```
+
+The consensus heat map displays the relative IQR of every item in every
+round, coloured relative to the consensus threshold. Since the relative IQR
+does not depend on the scale, indicators rated on different scales can be
+shown side by side.
+
+```{r fig-consensus, fig.height = 5}
+plot(x, type = "consensus")
+```
+
+With two indicators, the items can be mapped by their median ratings, as in
+the impact-plausibility matrices used in foresight studies.
+
+```{r fig-map, fig.height = 6, fig.width = 7}
+plot(x, type = "map")
+```
+
+# Round report
+
+`delphi_report()` assembles the analyses above into a self-contained report
+in HTML or Microsoft Word format. The report states the criteria adopted,
+with references, and closes with the items to be submitted to the next
+round. Full item statements are taken from the labels stored in the data,
+as read from the items sheet of the template or from a file with two header
+rows, or can be supplied through `item_labels`.
+
+```{r report, eval = FALSE}
+delphi_report(
+  x,
+  file = "round2_report.docx",
+  title = "Delphi study on the future of work: round 2",
+  author = "Research team",
+  item_labels = c(
+    E1 = "Remote work becomes the default arrangement for knowledge workers",
+    E2 = "AI agents autonomously manage recruitment pipelines"
+  )
+)
+```
+
+# References
+
+Scheibe, M., Skutsch, M. and Schofer, J. (1975). Experiments in Delphi
+methodology. In H. A. Linstone and M. Turoff (Eds.), *The Delphi Method:
+Techniques and Applications* (pp. 262-287). Reading, MA:
+Addison-Wesley.
+
+von der Gracht, H. A. (2012). Consensus measurement in Delphi studies:
+Review and implications for future quality assurance. *Technological
+Forecasting and Social Change*, 79(8), 1525-1536.
+https://doi.org/10.1016/j.techfore.2012.04.013

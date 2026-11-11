@@ -1,0 +1,392 @@
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, message = FALSE, warning = FALSE,
+  fig.width = 8, dpi = 150,
+  fig.align = if (knitr::is_html_output()) "center" else "default"
+)
+
+# Pipe table with explicit relative column widths. Each column is at least
+# as wide as the longest word of its header and its longest entry, and the
+# separator line is made longer than Pandoc's 72 columns so that the table
+# spans the text width in both HTML and Word.
+tab <- function(df, digits = 2) {
+  cells <- lapply(df, function(v) {
+    if (is.double(v)) {
+      out <- formatC(round(v, digits), format = "f", digits = digits)
+      out <- sub("\\.?0+$", "", out)
+    } else {
+      out <- as.character(v)
+    }
+    out[is.na(v)] <- ""
+    out
+  })
+  hdr <- names(df)
+  right <- vapply(df, is.numeric, logical(1))
+  w <- mapply(function(h, v) {
+    max(c(nchar(strsplit(h, " ", fixed = TRUE)[[1]]), nchar(v), 4)) + 3
+  }, hdr, cells)
+  # Long statements wrap inside their cell instead of squeezing the short
+  # columns: when the table is too wide, only columns wider than 14
+  # characters are narrowed
+  w <- pmin(w, 40)
+  if (sum(w) > 78) {
+    big <- w > 14
+    room <- sum(w[big] - 14)
+    if (room > 0) {
+      w[big] <- w[big] - (w[big] - 14) * min(1, (sum(w) - 78) / room)
+    }
+  }
+  w <- ceiling(w)
+  if (sum(w + 3) < 80) w <- ceiling(w * 80 / sum(w + 3))
+  sep <- ifelse(right, paste0(strrep("-", w - 1), ":"),
+                paste0(":", strrep("-", w - 1)))
+  row <- function(v) paste0("| ", paste(v, collapse = " | "), " |")
+  rows <- vapply(seq_len(nrow(df)), function(i) {
+    row(vapply(cells, `[`, character(1), i))
+  }, character(1))
+  c("", row(hdr), row(sep), rows, "")
+}
+
+pct <- function(v, digits = 0) {
+  ifelse(is.na(v), "", paste0(formatC(100 * v, format = "f", digits = digits), "%"))
+}
+yes_no <- function(v) {
+  ifelse(is.na(v), "n/a", ifelse(v, "Yes", "No"))
+}
+cap <- function(s) paste0(toupper(substring(s, 1, 1)), substring(s, 2))
+scale_txt <- function(s) paste0("from ", s[1], " to ", s[2])
+list_txt <- function(v) {
+  if (length(v) <= 1) return(paste(v, collapse = ""))
+  paste0(paste(v[-length(v)], collapse = ", "), " and ", v[length(v)])
+}
+
+inds <- names(x$scales)
+rounds <- sort(unique(x$data$round))
+n_experts <- length(unique(x$data$expert))
+multi_round <- length(rounds) > 1
+
+st <- delphi_status(
+  x, round = cfg$round, threshold = cfg$threshold,
+  relative_to = cfg$relative_to, method = cfg$method,
+  alpha = cfg$alpha, scheibe = cfg$scheibe, type = cfg$type,
+  paired = cfg$paired
+)
+assessed <- tapply(st$round, st$indicator, unique)
+
+stab <- if (multi_round) {
+  delphi_stability(
+    x, method = cfg$method, alpha = cfg$alpha, scheibe = cfg$scheibe,
+    type = cfg$type, paired = cfg$paired
+  )
+} else {
+  NULL
+}
+
+n_items <- length(x$items)
+per_round <- tapply(x$data$expert[!is.na(x$data$value)],
+                    x$data$round[!is.na(x$data$value)],
+                    function(e) length(unique(e)))
+nw <- function(n) {
+  words <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+  ifelse(n >= 1 & n <= 10, words[pmin(pmax(n, 1), 10)], as.character(n))
+}
+plural <- function(n, word) paste0(nw(n), " ", word, if (n != 1) "s" else "")
+overview_txt <- if (cfg$linked || !multi_round) {
+  paste0("This report summarises the ratings collected in a Delphi study involving ",
+         n_experts, " experts over ", plural(length(rounds), "round"), ".")
+} else {
+  paste0("This report summarises the ratings collected in a Delphi study over ",
+         plural(length(rounds), "round"), ", with ",
+         list_txt(paste0(per_round, " experts in round ", names(per_round))),
+         ". The experts are not linked across rounds.")
+}
+facet_height <- 1.4 + 2.1 * ceiling(n_items / 4)
+heat_height <- 1.8 + 0.42 * n_items
+
+scale_desc <- vapply(
+  inds, function(i) paste0(i, " (", scale_txt(x$scales[[i]]), ")"), character(1)
+)
+denominator <- if (cfg$relative_to == "points") {
+  "the number of points of the rating scale"
+} else {
+  "the range of the rating scale (maximum minus minimum)"
+}
+```
+
+# Overview
+
+`r overview_txt` The panel rated `r n_items` items on
+`r plural(length(inds), "indicator")`: `r list_txt(scale_desc)`. Unless
+otherwise stated, the assessment refers to round
+`r list_txt(unique(as.character(assessed)))`.
+
+```{r item-labels, results = "asis"}
+if (!is.null(cfg$item_labels)) {
+  cat("\n## Items\n\n")
+  lab <- data.frame(
+    Item = x$items,
+    Statement = unname(cfg$item_labels[x$items])
+  )
+  lab$Statement[is.na(lab$Statement)] <- ""
+  cat(tab(lab), sep = "\n")
+  cat("\n")
+}
+```
+
+# Methods
+
+**Descriptive statistics.** For each item, round and indicator, the report
+gives the number of ratings, the median, the first and third quartiles
+(Q1, Q3) and the interquartile range (IQR = Q3 - Q1). Quantiles are
+computed with the type `r cfg$type` algorithm of Hyndman and Fan (1996), as
+implemented in R. The relative IQR expresses the IQR as a share of
+`r denominator`, so that dispersion can be compared across indicators rated
+on different scales.
+
+**Consensus.** An item is considered to have reached consensus when its IQR
+does not exceed `r format(100 * cfg$threshold)`% of `r denominator`
+(von der Gracht, 2012). On the scales used in this study, this corresponds to
+`r list_txt(vapply(inds, function(i) { s <- x$scales[[i]]; w <- if (cfg$relative_to == "points") s[2] - s[1] + 1 else s[2] - s[1]; paste0("IQR ≤ ", format(round(cfg$threshold * w, 2)), " for ", i) }, character(1)))`.
+
+```{r methods-stability, results = "asis"}
+if (multi_round) {
+  test <- if (cfg$paired) "paired Wilcoxon signed-rank test" else
+    "Wilcoxon rank-sum (Mann-Whitney) test"
+  base <- if (cfg$paired) "the paired experts" else "the respondents"
+  crit <- switch(cfg$method,
+    wilcoxon = paste0(
+      "an item is considered stable when the ", test, " comparing the two ",
+      "rounds is not significant at the ", format(cfg$alpha), " level"
+    ),
+    scheibe = paste0(
+      "an item is considered stable when the net change between the two rating ",
+      "distributions does not exceed ", format(100 * cfg$scheibe), "% of ", base,
+      " (Scheibe, Skutsch and Schofer, 1975)"
+    ),
+    both = paste0(
+      "an item is considered stable when the ", test, " is not significant at ",
+      "the ", format(cfg$alpha), " level and the net change between the two ",
+      "rating distributions does not exceed ", format(100 * cfg$scheibe),
+      "% of ", base, " (Scheibe, Skutsch and Schofer, 1975)"
+    )
+  )
+  design <- if (cfg$paired) {
+    paste0(
+      "Stability is assessed between consecutive rounds on the experts who ",
+      "rated the item in both rounds, so that attrition is not mistaken for a ",
+      "change of opinion: "
+    )
+  } else {
+    paste0(
+      "Since the experts cannot be identified across rounds, consecutive rounds ",
+      "are compared as independent samples; differences between rounds ",
+      "therefore reflect both changes of opinion and changes in the ",
+      "composition of the panel: "
+    )
+  }
+  cat("**Stability.** ", design, crit, ". Both criteria are reported in the ",
+      "stability tables.\n\n", sep = "")
+}
+```
+
+**Item status.** Consensus and stability are combined into four categories:
+
+```{r status-table, results = "asis"}
+cat(tab(data.frame(
+  Status = c("Consensus", "Unstable consensus", "Stable dissent", "Open"),
+  Consensus = c("Yes", "Yes", "No", "No"),
+  Stable = c("Yes", "No", "Yes", "No"),
+  `Further round` = c("No", "Yes", "No", "Yes"),
+  check.names = FALSE
+)), sep = "\n")
+```
+
+A stable dissent indicates that opinions have ceased to change without
+converging; it is a substantive finding rather than a failure of the
+process. `r if (!multi_round) "As only one round is available, stability cannot yet be assessed, and items are classified on the basis of consensus alone."`
+
+# Panel participation
+
+```{r panel, results = "asis"}
+p <- delphi_panel(x)
+if (!cfg$linked) {
+  cat(tab(data.frame(Round = p$round, Respondents = p$respondents)), sep = "\n")
+  cat("\nRespondents are the experts who provided at least one rating in a ",
+      "round. The experts are not linked across rounds, so that retention ",
+      "cannot be computed.\n", sep = "")
+} else {
+p_out <- data.frame(
+  Round = p$round,
+  Respondents = p$respondents,
+  Retained = ifelse(is.na(p$retained), "n/a", p$retained),
+  Dropped = ifelse(is.na(p$dropped), "n/a", p$dropped),
+  Joined = ifelse(is.na(p$joined), "n/a", p$joined),
+  `Retention since round 1` = pct(p$retention),
+  check.names = FALSE
+)
+cat(tab(p_out), sep = "\n")
+cat("\nRespondents are the experts who provided at least one rating in a ",
+    "round. Retention is the share of first-round respondents who also took ",
+    "part in each subsequent round.\n", sep = "")
+}
+```
+
+# Results by indicator
+
+```{r results-by-indicator, results = "asis", fig.height = facet_height}
+for (ind in inds) {
+  s <- x$scales[[ind]]
+  r <- assessed[[ind]]
+  cat("\n## ", cap(ind), " (rating scale ", scale_txt(s), ")\n\n", sep = "")
+
+  cons <- delphi_consensus(
+    x, threshold = cfg$threshold, relative_to = cfg$relative_to,
+    round = r, indicator = ind, type = cfg$type
+  )
+  sti <- st[st$indicator == ind, ]
+  out <- data.frame(
+    Item = cons$item,
+    n = cons$n,
+    Median = cons$median,
+    Q1 = cons$q1,
+    Q3 = cons$q3,
+    IQR = cons$iqr,
+    `Relative IQR` = pct(cons$iqr_rel),
+    Consensus = yes_no(cons$consensus),
+    Status = cap(sti$status[match(cons$item, sti$item)]),
+    check.names = FALSE
+  )
+  cat("**Table.** Summary statistics and status of the items in round ", r,
+      ".\n\n", sep = "")
+  cat(tab(out), sep = "\n")
+  cat("\n\n")
+
+  if (multi_round) {
+    sb <- stab[stab$indicator == ind, ]
+    arrow <- paste(sb$round_from, "to", sb$round_to)
+    if (cfg$paired) {
+      sb_out <- data.frame(
+        Item = sb$item,
+        Rounds = arrow,
+        `Paired n` = sb$n_paired,
+        `Median change` = sb$median_change,
+        `IQR change` = sb$iqr_change,
+        `Experts who changed` = pct(sb$changed),
+        `Wilcoxon p` = formatC(sb$p_value, format = "f", digits = 3),
+        `Net change (Scheibe)` = pct(sb$scheibe_change),
+        Stable = yes_no(sb$stable),
+        check.names = FALSE
+      )
+    } else {
+      sb_out <- data.frame(
+        Item = sb$item,
+        Rounds = arrow,
+        `n (from)` = sb$n_from,
+        `n (to)` = sb$n_to,
+        `Median change` = sb$median_change,
+        `IQR change` = sb$iqr_change,
+        `Rank-sum p` = formatC(sb$p_value, format = "f", digits = 3),
+        `Net change (Scheibe)` = pct(sb$scheibe_change),
+        Stable = yes_no(sb$stable),
+        check.names = FALSE
+      )
+    }
+    cat("**Table.** Stability of the ratings between consecutive rounds.\n\n")
+    cat(tab(sb_out), sep = "\n")
+    cat("\n\n")
+  }
+
+  print(delphi_plot_distribution(x, indicator = ind, ncol = 4))
+  cat("\n\n")
+  if (multi_round) {
+    print(delphi_plot_trend(
+      x, indicator = ind, ncol = 4, threshold = cfg$threshold,
+      relative_to = cfg$relative_to, type = cfg$type
+    ))
+    cat("\n\n")
+  }
+}
+```
+
+# Consensus overview
+
+```{r heatmap, fig.height = heat_height}
+delphi_plot_consensus(
+  x, threshold = cfg$threshold, relative_to = cfg$relative_to, type = cfg$type
+)
+```
+
+```{r map, results = "asis", fig.height = 6.5, fig.width = 7.5}
+if (length(inds) >= 2) {
+  cat("\n# ", cap(inds[1]), " and ", inds[2], "\n\n", sep = "")
+  cat(
+    "The figure places each item according to its median ", inds[1],
+    " (horizontal axis) and median ", inds[2], " (vertical axis). Bars show ",
+    "the interquartile ranges, and dashed lines mark the midpoints of the two ",
+    "scales.\n\n", sep = ""
+  )
+  print(delphi_plot_map(
+    x, x_indicator = inds[1], y_indicator = inds[2],
+    threshold = cfg$threshold, relative_to = cfg$relative_to, type = cfg$type
+  ))
+  cat("\n\n")
+}
+```
+
+# Items for the next round
+
+```{r next-round, results = "asis"}
+levels_st <- c("consensus", "unstable consensus", "stable dissent", "open")
+counts <- as.data.frame.matrix(table(
+  factor(st$indicator, levels = inds),
+  factor(st$status, levels = levels_st)
+))
+counts <- data.frame(
+  Indicator = cap(rownames(counts)),
+  Round = unname(assessed[rownames(counts)]),
+  counts,
+  check.names = FALSE
+)
+names(counts)[-(1:2)] <- cap(levels_st)
+cat("**Table.** Number of items by status.\n\n")
+cat(tab(counts), sep = "\n")
+cat("\n\n")
+
+nr <- st[st$next_round, ]
+if (nrow(nr) == 0) {
+  cat("No item requires a further round under the criteria adopted.\n")
+} else {
+  cat("The following items should be submitted to a further round, together ",
+      "with the controlled feedback of the current one.\n\n", sep = "")
+  nr_out <- data.frame(
+    Indicator = cap(nr$indicator),
+    Item = nr$item,
+    Median = nr$median,
+    IQR = nr$iqr,
+    Status = cap(nr$status)
+  )
+  if (!is.null(cfg$item_labels)) {
+    nr_out$Statement <- unname(cfg$item_labels[nr$item])
+    nr_out$Statement[is.na(nr_out$Statement)] <- ""
+  }
+  cat(tab(nr_out), sep = "\n")
+  cat("\n")
+}
+```
+
+# References
+
+Hyndman, R. J. and Fan, Y. (1996). Sample quantiles in statistical packages.
+*The American Statistician*, 50(4), 361-365.
+
+`r if (multi_round) "Scheibe, M., Skutsch, M. and Schofer, J. (1975). Experiments in Delphi methodology. In H. A. Linstone and M. Turoff (Eds.), *The Delphi Method: Techniques and Applications* (pp. 262-287). Reading, MA: Addison-Wesley."`
+
+von der Gracht, H. A. (2012). Consensus measurement in Delphi studies:
+Review and implications for future quality assurance. *Technological
+Forecasting and Social Change*, 79(8), 1525-1536.
+https://doi.org/10.1016/j.techfore.2012.04.013
+
+---
+
+*Report generated with the R package DelphiR, version
+`r as.character(utils::packageVersion("DelphiR"))`.*

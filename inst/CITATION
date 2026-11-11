@@ -1,0 +1,11 @@
+bibentry(
+  bibtype = "Manual",
+  title = "{DelphiR}: Statistical Analysis of Delphi Studies",
+  author = person("Yuri", "Calleo"),
+  year = "2026",
+  note = paste("R package version", meta$Version),
+  textVersion = paste0(
+    "Calleo, Y. (2026). DelphiR: Statistical Analysis of Delphi Studies. ",
+    "R package version ", meta$Version, "."
+  )
+)
